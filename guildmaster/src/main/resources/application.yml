@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: ${POSTGRES_DB_JDBC}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  data:
+    redis:
+      host: ${REDIS_DB_HOST}
+      port: ${REDIS_DB_PORT}
+  application:
+    name: guildmaster
+server:
+  port: 8085
