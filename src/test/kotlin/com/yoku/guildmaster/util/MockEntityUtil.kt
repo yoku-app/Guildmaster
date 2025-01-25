@@ -6,7 +6,6 @@ import java.util.*
 
 @Component
 class MockEntityUtil {
-
     fun generateMockOrganisation(id: UUID): Organisation {
         return Organisation(
             id = id,

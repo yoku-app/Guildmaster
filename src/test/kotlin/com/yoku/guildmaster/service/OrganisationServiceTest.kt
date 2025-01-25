@@ -11,8 +11,9 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.*
 
-class OrganisationServiceTest(private val mockEntity: MockEntityUtil) {
+class OrganisationServiceTest() {
 
+    private val mockEntity: MockEntityUtil = MockEntityUtil()
     private val uuidUtil: UUIDUtil = mockk()
     private val organisationRepository: OrganisationRepository = mockk()
     private val organisationService = OrganisationService(organisationRepository, uuidUtil)

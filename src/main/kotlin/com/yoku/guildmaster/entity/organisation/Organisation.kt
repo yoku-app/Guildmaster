@@ -19,7 +19,7 @@ class Organisation(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID,
-    @OneToOne(cascade = [CascadeType.ALL])
+    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "org_industry_id")
     var industry: Industry?,
     @Column(name = "org_creator_id", nullable = false)
@@ -36,4 +36,8 @@ class Organisation(
     var avatarURL: String?,
     @Column(name = "org_public_status", nullable = false)
     var publicStatus: Boolean,
+
+    @Version
+    @Column(name = "version")
+    var version: Long? = 0L // Default value
 )

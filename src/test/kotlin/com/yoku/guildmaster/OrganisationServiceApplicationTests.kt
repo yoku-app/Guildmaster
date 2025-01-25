@@ -7,9 +7,4 @@ import org.springframework.context.annotation.Import
 
 @SpringBootTest
 class GuildmasterApplicationTests {
-
-    @Test
-    fun contextLoads() {
-    }
-
 }
