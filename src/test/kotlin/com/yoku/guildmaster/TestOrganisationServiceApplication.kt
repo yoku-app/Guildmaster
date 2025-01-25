@@ -4,5 +4,5 @@ import org.springframework.boot.fromApplication
 
 
 fun main(args: Array<String>) {
-    fromApplication<GuildmasterApplication>().with(TestcontainersConfiguration::class).run(*args)
+    fromApplication<GuildmasterApplication>().run(*args)
 }
