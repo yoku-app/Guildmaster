@@ -93,7 +93,7 @@ class InvitationService(
         validateInviteOwnership(invite, userEmail)
 
         // Consume Invite and Add member to organisation
-        invite.setInviteStatus(OrganisationInvite.InviteStatus.ACCEPTED)
+        invite.inviteStatus = OrganisationInvite.InviteStatus.ACCEPTED
         organisationInviteRepository.save(invite)
         return organisationMemberService.addMemberToOrganisation(invite, user)
     }
@@ -113,7 +113,7 @@ class InvitationService(
         validateInviteOwnership(invite, userEmail)
 
         // Reject the invitation, no further action required
-        invite.setInviteStatus(OrganisationInvite.InviteStatus.REJECTED)
+        invite.inviteStatus = OrganisationInvite.InviteStatus.REJECTED
         organisationInviteRepository.save(invite)
     }
 

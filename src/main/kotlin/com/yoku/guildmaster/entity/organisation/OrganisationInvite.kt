@@ -53,12 +53,7 @@ data class OrganisationInvite(
         )
     }
 
-    fun setInviteStatus(status: InviteStatus): Unit{
-        this.inviteStatus = status
-    }
-
     fun isInvitationValid(): Boolean{
         return this.expiresAt.isAfter(LocalDateTime.now()) && this.inviteStatus == InviteStatus.PENDING
     }
-
 }
