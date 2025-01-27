@@ -5,21 +5,18 @@ import com.yoku.guildmaster.exceptions.InvalidArgumentException
 import com.yoku.guildmaster.exceptions.InvalidOrganisationPermissionException
 import com.yoku.guildmaster.exceptions.OrganisationNotFoundException
 import com.yoku.guildmaster.repository.OrganisationRepository
-import com.yoku.guildmaster.util.UUIDUtil
 import org.springframework.stereotype.Service
 import java.util.UUID
 import kotlin.jvm.Throws
 
 @Service
 class OrganisationService(
-    private val organisationRepository: OrganisationRepository,
-    private val uuidUtil: UUIDUtil
+    private val organisationRepository: OrganisationRepository
 ) {
 
     @Throws(InvalidArgumentException::class, OrganisationNotFoundException::class)
-    fun getOrganisationByID(id: String): Organisation {
-        val uuid: UUID = this.uuidUtil.parseUUID(id)
-        return this.findOrganisationByIdOrThrow(uuid)
+    fun getOrganisationByID(id: UUID): Organisation {
+        return this.findOrganisationByIdOrThrow(id)
     }
 
     @Throws(OrganisationNotFoundException::class)
@@ -56,13 +53,12 @@ class OrganisationService(
             .orElseThrow { OrganisationNotFoundException("Organisation not found") }
     }
 
-    fun deleteOrganisation(id: String){
+    fun deleteOrganisation(id: UUID){
         //todo: Validate Users Organisation permissions for ORG Crud
         if(false){
             throw InvalidOrganisationPermissionException("User does not have permission to update Organisation")
         }
 
-        val uuid: UUID = this.uuidUtil.parseUUID(id)
-        this.organisationRepository.deleteById(uuid)
+        this.organisationRepository.deleteById(id)
     }
 }
