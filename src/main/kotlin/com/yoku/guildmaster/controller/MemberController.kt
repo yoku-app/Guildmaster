@@ -1,6 +1,6 @@
 package com.yoku.guildmaster.controller
 
-import com.yoku.guildmaster.entity.organisation.OrgMemberDTO
+import com.yoku.guildmaster.entity.dto.OrgMemberDTO
 import com.yoku.guildmaster.service.MemberService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping

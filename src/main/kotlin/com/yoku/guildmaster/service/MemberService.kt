@@ -1,6 +1,6 @@
 package com.yoku.guildmaster.service
 
-import com.yoku.guildmaster.entity.organisation.OrgMemberDTO
+import com.yoku.guildmaster.entity.dto.OrgMemberDTO
 import com.yoku.guildmaster.entity.organisation.Organisation
 import com.yoku.guildmaster.entity.organisation.OrganisationInvite
 import com.yoku.guildmaster.entity.organisation.OrganisationMember
@@ -19,7 +19,7 @@ class MemberService(private val organisationService: OrganisationService, privat
 
     @Throws(InvalidArgumentException::class, OrganisationNotFoundException::class)
     fun fetchOrganisationMembers(id: UUID): List<OrgMemberDTO>{
-        return organisationService.getOrganisationByID(id).members.map { OrgMemberDTO(it.user) }
+        return organisationMemberRepository.findByIdOrganisationId(id).map { it.toDTO() }
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.yoku.guildmaster.entity.organisation
 
+import com.yoku.guildmaster.entity.dto.OrgMemberDTO
 import com.yoku.guildmaster.entity.user.UserProfile
 import jakarta.persistence.*
 import java.io.Serializable
@@ -25,7 +26,12 @@ data class OrganisationMember(
     @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    val user: UserProfile
+    val user: UserProfile,
+
+    @MapsId("organisationId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organisation_id", nullable = false)
+    val organisation: Organisation
 ) {
     @Embeddable
     data class OrganisationMemberKey(
@@ -35,5 +41,14 @@ data class OrganisationMember(
         @Column(name = "user_id", nullable = false)
         val userId: UUID
     ) : Serializable
+
+    fun toDTO(): OrgMemberDTO {
+        return OrgMemberDTO(
+            id = this.id.userId,
+            displayName = this.user.displayName,
+            email = this.user.email,
+            avatarUrl = this.user.avatarUrl
+        )
+    }
 
 }

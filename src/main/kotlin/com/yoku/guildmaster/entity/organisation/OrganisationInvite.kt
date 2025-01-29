@@ -1,8 +1,12 @@
 package com.yoku.guildmaster.entity.organisation
 
+import com.yoku.guildmaster.entity.dto.OrgInviteDTO
 import com.yoku.guildmaster.entity.user.UserProfile
 import jakarta.persistence.*
+import java.time.Duration
+import java.time.Instant
 import java.time.LocalDateTime
+import java.util.Date
 import java.util.UUID
 
 @Entity
@@ -10,7 +14,7 @@ import java.util.UUID
     name = "org_user_invite",
     indexes = [
         Index(name = "idx_invite_user_id", columnList = "user_id"),
-        Index(name = "idx_invite_invite_token", columnList = "invite_token")
+        Index(name = "idx_invite_code", columnList = "invite_code")
     ]
 )
 data class OrganisationInvite(
@@ -27,11 +31,12 @@ data class OrganisationInvite(
     @Column(name = "invite_code", length = 12, nullable = false)
     val token: String,
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     var inviteStatus: InviteStatus = InviteStatus.PENDING,
     @Column(name = "expires_at")
-    val expiresAt: LocalDateTime = LocalDateTime.now().plusDays(7),
+    val expiresAt: Date = Date.from(Instant.now().plus(Duration.ofDays(7))),
     @Column(name = "created_at", updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: Date = Date()
     ){
 
     enum class InviteStatus {
@@ -50,10 +55,23 @@ data class OrganisationInvite(
         return OrganisationMember(
             id = organisationMemberKey,
             user = user,
+            organisation = this.organisation
+        )
+    }
+
+    fun toDTO(): OrgInviteDTO {
+        return OrgInviteDTO(
+            id = this.id,
+            organisationId = this.organisation.id,
+            email = this.email,
+            token = this.token,
+            status = this.inviteStatus,
+            createdAt = this.createdAt,
+            expiresAt = this.expiresAt
         )
     }
 
     fun isInvitationValid(): Boolean{
-        return this.expiresAt.isAfter(LocalDateTime.now()) && this.inviteStatus == InviteStatus.PENDING
+        return this.expiresAt.before(Date()) && this.inviteStatus == InviteStatus.PENDING
     }
 }
