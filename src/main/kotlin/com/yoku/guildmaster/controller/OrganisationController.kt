@@ -1,5 +1,6 @@
 package com.yoku.guildmaster.controller
 
+import com.yoku.guildmaster.entity.dto.OrganisationDTO
 import com.yoku.guildmaster.entity.organisation.Organisation
 import com.yoku.guildmaster.service.OrganisationService
 import org.springframework.http.HttpStatus
@@ -19,30 +20,29 @@ import java.util.UUID
 class OrganisationController(private val organisationService: OrganisationService){
 
     @GetMapping("/id/{id}")
-    fun getOrganisationById(@PathVariable id: UUID): ResponseEntity<Organisation>{
-        val organisation: Organisation = this.organisationService.getOrganisationByID(id)
+    fun getOrganisationById(@PathVariable id: UUID): ResponseEntity<OrganisationDTO>{
+        val organisation: OrganisationDTO = this.organisationService.getOrganisationByID(id).toDTO()
         return ResponseEntity.ok(organisation)
     }
 
     @GetMapping("/name/{name}")
-    fun getOrganisationByName(@PathVariable name: String): ResponseEntity<Organisation>{
-        val organisation: Organisation = this.organisationService.getOrganisationByName(name)
+    fun getOrganisationByName(@PathVariable name: String): ResponseEntity<OrganisationDTO>{
+        val organisation: OrganisationDTO = this.organisationService.getOrganisationByName(name).toDTO()
         return ResponseEntity.ok(organisation)
     }
 
     @PutMapping("/{userId}")
-    fun updateOrganisation(@RequestBody organisation: Organisation, @PathVariable userId: UUID): ResponseEntity<Organisation>{
-        val updatedOrganisation: Organisation = this.organisationService.updateOrganisation(
+    fun updateOrganisation(@RequestBody organisation: OrganisationDTO, @PathVariable userId: UUID): ResponseEntity<OrganisationDTO>{
+        val updatedOrganisation: OrganisationDTO = this.organisationService.updateOrganisation(
             updaterUserId = userId,
-            organisation = organisation
-        )
+            organisation = organisation)
 
         return ResponseEntity.ok(updatedOrganisation)
     }
 
-    @PostMapping("/")
-    fun createOrganisation(@RequestBody organisation: Organisation): ResponseEntity<Organisation>{
-        val createdOrganisation: Organisation = this.organisationService.saveOrganisation(organisation)
+    @PostMapping("/industry/{industryId}/user/{userId}")
+    fun createOrganisation(@RequestBody organisation: OrganisationDTO): ResponseEntity<OrganisationDTO>{
+        val createdOrganisation: OrganisationDTO = this.organisationService.saveOrganisation(organisation)
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrganisation)
     }
 
