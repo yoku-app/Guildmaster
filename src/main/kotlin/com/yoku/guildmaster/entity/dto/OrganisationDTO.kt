@@ -3,6 +3,7 @@ package com.yoku.guildmaster.entity.dto
 import com.yoku.guildmaster.entity.lookups.Industry
 import com.yoku.guildmaster.entity.organisation.OrganisationInvite
 import com.yoku.guildmaster.entity.user.UserProfile
+import java.time.ZonedDateTime
 import java.util.*
 
 data class OrganisationDTO(
@@ -32,6 +33,6 @@ data class OrgInviteDTO(
     val email: String,
     val token: String,
     val status: OrganisationInvite.InviteStatus,
-    val createdAt: Date,
-    val expiresAt: Date
+    val createdAt: ZonedDateTime,
+    val expiresAt: ZonedDateTime
 )

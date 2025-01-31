@@ -85,10 +85,10 @@ class OrganisationService(
             .orElseThrow { OrganisationNotFoundException("Organisation not found") }
     }
 
-    fun deleteOrganisation(id: UUID){
+    fun deleteOrganisation(id: UUID, userId: UUID){
         //todo: Validate Users Organisation permissions for ORG Crud
         if(false){
-            throw InvalidOrganisationPermissionException("User does not have permission to update Organisation")
+            throw InvalidOrganisationPermissionException("User does not have permission to delete Organisation")
         }
         this.organisationRepository.deleteById(id)
     }

@@ -4,7 +4,7 @@ import com.yoku.guildmaster.entity.dto.OrganisationDTO
 import com.yoku.guildmaster.entity.lookups.Industry
 import com.yoku.guildmaster.entity.user.UserProfile
 import jakarta.persistence.*
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.Date
 import java.util.UUID
 
@@ -24,11 +24,11 @@ data class Organisation(
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "org_industry_id", nullable = false)
     var industry: Industry,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "org_creator_id", nullable = false)
     var creator: UserProfile,
 
@@ -51,10 +51,10 @@ data class Organisation(
     var publicStatus: Boolean = false,
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    val createdAt: Date = Date(),
+    val createdAt: ZonedDateTime = ZonedDateTime.now(),
 
     @Column(name = "updated_at", nullable = false, updatable = false)
-    val updatedAt: Date = Date(),
+    val updatedAt: ZonedDateTime = ZonedDateTime.now(),
 
     @Column(name = "org_surveys_created", nullable = false,  updatable = false)
     val surveyCreationCount: Int = 0,
@@ -86,8 +86,6 @@ data class Organisation(
             memberCount = this.memberCount,
             avatarURL = this.avatarURL,
             publicStatus = this.publicStatus,
-
-
             surveyCreationCount = this.surveyCreationCount,
             averageSurveyReviewRating = this.averageSurveyReviewRating,
             industry = this.industry,

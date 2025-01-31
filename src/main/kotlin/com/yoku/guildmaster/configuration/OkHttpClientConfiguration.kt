@@ -22,9 +22,4 @@ class OkHttpConfig {
             .addInterceptor(logging)
             .build()
     }
-
-    @Bean
-    fun objectMapper(): ObjectMapper {
-        return ObjectMapper().findAndRegisterModules()
-    }
 }

@@ -36,3 +36,4 @@ logging:
       file-name-pattern: ./logs/application-%d{yyyy-MM-dd}.%i.log  # Rolling logs per day
       max-history: 30  # Keep logs for the last 30 days
 
+

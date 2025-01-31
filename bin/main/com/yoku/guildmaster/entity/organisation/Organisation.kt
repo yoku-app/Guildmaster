@@ -3,7 +3,7 @@ package com.yoku.guildmaster.entity.organisation
 import com.yoku.guildmaster.entity.lookups.Industry
 import com.yoku.guildmaster.entity.user.UserProfile
 import jakarta.persistence.*
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.UUID
 
 @Entity
@@ -22,11 +22,11 @@ data class Organisation(
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = )
     @JoinColumn(name = "org_industry_id", nullable = false)
     var industry: Industry,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.E)
     @JoinColumn(name = "org_creator_id", nullable = false)
     var creator: UserProfile,
 
@@ -49,10 +49,10 @@ data class Organisation(
     var publicStatus: Boolean = false,
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: ZonedDateTime = ZonedDateTime.now(),
 
     @Column(name = "updated_at", nullable = false, updatable = false)
-    val updatedAt: LocalDateTime = LocalDateTime.now(),
+    val updatedAt: ZonedDateTime = ZonedDateTime.now(),
 
     @Column(name = "survey_creation_count", nullable = false)
     var surveyCreationCount: Int = 0,

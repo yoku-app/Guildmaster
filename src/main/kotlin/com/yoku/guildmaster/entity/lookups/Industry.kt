@@ -1,13 +1,13 @@
 package com.yoku.guildmaster.entity.lookups
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
-import java.time.LocalDateTime
-import java.util.Date
+import java.time.ZonedDateTime
 import java.util.UUID
 
 @Entity
@@ -21,7 +21,7 @@ class Industry (
     @Column(name = "industry_desc", nullable = false)
     var description: String,
     @Column(name ="created_at", nullable = false)
-    var createdAt: LocalDateTime = LocalDateTime.now(),
+    var createdAt: ZonedDateTime = ZonedDateTime.now(),
     @Column(name ="updated_at", nullable = false)
-    var updatedAt: LocalDateTime = LocalDateTime.now(),
+    var updatedAt: ZonedDateTime = ZonedDateTime.now(),
 )

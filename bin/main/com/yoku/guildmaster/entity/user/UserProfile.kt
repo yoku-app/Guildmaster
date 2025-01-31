@@ -1,7 +1,7 @@
 package com.yoku.guildmaster.entity.user
 
 import jakarta.persistence.*
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.*
 
 @Entity
@@ -17,7 +17,7 @@ data class UserProfile(
 
     @Column(name = "phone") val phone: String? = null,
 
-    @Column(name = "dob") val dob: LocalDateTime?,
+    @Column(name = "dob") val dob: ZonedDateTime?,
 
     @Enumerated(EnumType.STRING) @Column(name = "main_focus") val focus: Focus?,
 
@@ -31,22 +31,22 @@ data class UserProfile(
         name = "created_at",
         nullable = false,
         updatable = false
-    ) var createdAt: LocalDateTime = LocalDateTime.now(),
+    ) var createdAt: ZonedDateTime = ZonedDateTime.now(),
 
-    @Column(name = "updated_at", nullable = false) var updatedAt: LocalDateTime = LocalDateTime.now(),
+    @Column(name = "updated_at", nullable = false) var updatedAt: ZonedDateTime = ZonedDateTime.now(),
 
     @Embedded val onboardingCompletion: OnboardingCompletion? = null
 ) {
 
     @PrePersist
     fun onPrePersist() {
-        createdAt = LocalDateTime.now()
-        updatedAt = LocalDateTime.now()
+        createdAt = ZonedDateTime.now()
+        updatedAt = ZonedDateTime.now()
     }
 
     @PreUpdate
     fun onPreUpdate() {
-        updatedAt = LocalDateTime.now()
+        updatedAt = ZonedDateTime.now()
     }
 
     @Embeddable

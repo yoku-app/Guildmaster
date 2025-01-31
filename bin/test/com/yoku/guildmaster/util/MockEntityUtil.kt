@@ -4,7 +4,7 @@ import com.yoku.guildmaster.entity.lookups.Industry
 import com.yoku.guildmaster.entity.organisation.Organisation
 import com.yoku.guildmaster.entity.user.UserProfile
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.*
 
 @Component
@@ -28,7 +28,7 @@ class MockEntityUtil {
             displayName = "Test User",
             email = "email@email.com",
             focus = UserProfile.Focus.CREATOR,
-            dob = LocalDateTime.now().minusYears(20),
+            dob = ZonedDateTime.now().minusYears(20),
         )
     }
 

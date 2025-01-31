@@ -5,7 +5,7 @@ import com.yoku.guildmaster.entity.user.UserProfile
 import jakarta.persistence.*
 import java.time.Duration
 import java.time.Instant
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.Date
 import java.util.UUID
 
@@ -34,9 +34,9 @@ data class OrganisationInvite(
     @Enumerated(EnumType.STRING)
     var inviteStatus: InviteStatus = InviteStatus.PENDING,
     @Column(name = "expires_at")
-    val expiresAt: Date = Date.from(Instant.now().plus(Duration.ofDays(7))),
+    val expiresAt: ZonedDateTime = ZonedDateTime.now().plusDays(7),
     @Column(name = "created_at", updatable = false)
-    val createdAt: Date = Date()
+    val createdAt: ZonedDateTime = ZonedDateTime.now()
     ){
 
     enum class InviteStatus {
@@ -72,6 +72,6 @@ data class OrganisationInvite(
     }
 
     fun isInvitationValid(): Boolean{
-        return this.expiresAt.before(Date()) && this.inviteStatus == InviteStatus.PENDING
+        return this.expiresAt.isAfter(ZonedDateTime.now()) && this.inviteStatus == InviteStatus.PENDING
     }
 }

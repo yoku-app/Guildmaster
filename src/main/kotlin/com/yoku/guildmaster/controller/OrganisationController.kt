@@ -21,7 +21,7 @@ class OrganisationController(private val organisationService: OrganisationServic
 
     @GetMapping("/id/{id}")
     fun getOrganisationById(@PathVariable id: UUID): ResponseEntity<OrganisationDTO>{
-        val organisation: OrganisationDTO = this.organisationService.getOrganisationByID(id).toDTO()
+        val organisation: OrganisationDTO = this.organisationService.getOrganisationByID(id).toDTO(includeCreator = true)
         return ResponseEntity.ok(organisation)
     }
 
@@ -40,15 +40,15 @@ class OrganisationController(private val organisationService: OrganisationServic
         return ResponseEntity.ok(updatedOrganisation)
     }
 
-    @PostMapping("/industry/{industryId}/user/{userId}")
+    @PostMapping("/")
     fun createOrganisation(@RequestBody organisation: OrganisationDTO): ResponseEntity<OrganisationDTO>{
         val createdOrganisation: OrganisationDTO = this.organisationService.saveOrganisation(organisation)
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrganisation)
     }
 
-    @DeleteMapping("/{id}")
-    fun deleteOrganisation(@PathVariable id: UUID): ResponseEntity<Unit>{
-        this.organisationService.deleteOrganisation(id)
+    @DeleteMapping("/{id}/user/{userId}")
+    fun deleteOrganisation(@PathVariable id: UUID, @PathVariable userId: UUID): ResponseEntity<Unit>{
+        this.organisationService.deleteOrganisation(id, userId)
         return ResponseEntity.ok().build()
     }
 }

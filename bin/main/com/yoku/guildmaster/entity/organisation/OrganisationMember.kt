@@ -3,7 +3,7 @@ package com.yoku.guildmaster.entity.organisation
 import com.yoku.guildmaster.entity.user.UserProfile
 import jakarta.persistence.*
 import java.io.Serializable
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.Date
 import java.util.UUID
 
@@ -20,7 +20,7 @@ data class OrganisationMember(
     val id: OrganisationMemberKey,
 
     @Column(name = "member_since", nullable = false, updatable = false)
-    val memberSince: LocalDateTime = LocalDateTime.now(),
+    val memberSince: ZonedDateTime = ZonedDateTime.now(),
 
     @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
