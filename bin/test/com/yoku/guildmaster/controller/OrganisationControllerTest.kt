@@ -43,7 +43,7 @@ class OrganisationControllerTest {
 
     @Test
     fun `createOrganisation should create and return new organisation`() {
-        val organisation = mockEntity.generateMockOrganisation(UUID.randomUUID())
+        val organisation = mockEntity.generateMockOrganisation()
 
         `when`(organisationService.saveOrganisation(organisation)).thenReturn(organisation)
 

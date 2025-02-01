@@ -25,7 +25,6 @@ class MemberServiceTest {
 
     @Test
     fun `fetchOrganisationMembers should return list of members when organisation exists`() {
-        val orgId = UUID.randomUUID()
         val organisation = mockEntity.generateMockOrganisation(orgId)
         val user1 = UserProfile(UUID.randomUUID(), "user1@example.com", "User One")
         val user2 = UserProfile(UUID.randomUUID(), "user2@example.com", "User Two")

@@ -24,12 +24,12 @@ data class OrganisationMember(
     val memberSince: ZonedDateTime = ZonedDateTime.now(),
 
     @MapsId("userId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     val user: UserProfile,
 
     @MapsId("organisationId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "organisation_id", nullable = false)
     val organisation: Organisation
 ) {
@@ -47,8 +47,14 @@ data class OrganisationMember(
             id = this.id.userId,
             displayName = this.user.displayName,
             email = this.user.email,
-            avatarUrl = this.user.avatarUrl
+            avatarUrl = this.user.avatarUrl,
+            memberSince = this.memberSince,
+            organisation = this.organisation.toPartialDTO()
         )
+    }
+
+    fun hasPermission(): Boolean {
+        return true
     }
 
 }

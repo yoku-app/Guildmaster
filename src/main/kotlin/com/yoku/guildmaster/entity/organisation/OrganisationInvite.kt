@@ -3,6 +3,8 @@ package com.yoku.guildmaster.entity.organisation
 import com.yoku.guildmaster.entity.dto.OrgInviteDTO
 import com.yoku.guildmaster.entity.user.UserProfile
 import jakarta.persistence.*
+import org.hibernate.annotations.GenericGenerator
+import org.hibernate.annotations.IdGeneratorType
 import java.time.Duration
 import java.time.Instant
 import java.time.ZonedDateTime
@@ -18,14 +20,23 @@ import java.util.UUID
     ]
 )
 data class OrganisationInvite(
+
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    val id: UUID = UUID.randomUUID(),
-    @ManyToOne(fetch = FetchType.LAZY)
+    @GeneratedValue
+    @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
+    val id: UUID? = null,
+
+    @Version
+    @Column(name = "version")
+    var version: Long = 0,
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "organisation_id")
     val organisation: Organisation,
-    @Column(name = "user_id")
-    val userId: UUID?,
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    val user: UserProfile?,
     @Column(name = "email")
     val email: String,
     @Column(name = "invite_code", length = 12, nullable = false)
@@ -48,7 +59,7 @@ data class OrganisationInvite(
 
     fun toOrganisationMember(user: UserProfile): OrganisationMember{
         val organisationMemberKey = OrganisationMember.OrganisationMemberKey(
-            organisationId = this.organisation.id,
+            organisationId = this.organisation.id ?: UUID.randomUUID(),
             userId = user.userId
         )
 
@@ -61,11 +72,12 @@ data class OrganisationInvite(
 
     fun toDTO(): OrgInviteDTO {
         return OrgInviteDTO(
-            id = this.id,
-            organisationId = this.organisation.id,
+            id = this.id ?: UUID.randomUUID(),
+            organisation = this.organisation.toPartialDTO(),
+            user = this.user?.toPartialDTO(),
             email = this.email,
             token = this.token,
-            status = this.inviteStatus,
+            inviteStatus = this.inviteStatus,
             createdAt = this.createdAt,
             expiresAt = this.expiresAt
         )

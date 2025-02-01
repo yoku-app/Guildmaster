@@ -34,7 +34,7 @@ class HttpService(
 
     fun generateInternalServiceConnection(target: TargetController, endpoint: String): Request.Builder{
         return Request.Builder()
-            .url("${getServiceURL(target)}/$endpoint")
+            .url("${getServiceURL(target)}$endpoint")
     }
 
     fun <T> get (builder: Request.Builder, responseType: Class<T>): T?{

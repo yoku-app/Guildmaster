@@ -1,8 +1,11 @@
 package com.yoku.guildmaster.controller
 
+import com.yoku.guildmaster.entity.dto.OrgInviteDTO
+import com.yoku.guildmaster.entity.dto.OrgMemberDTO
 import com.yoku.guildmaster.entity.organisation.OrganisationInvite
 import com.yoku.guildmaster.entity.organisation.OrganisationMember
 import com.yoku.guildmaster.service.InvitationService
+import jakarta.persistence.Enumerated
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -18,16 +21,17 @@ import java.util.UUID
 @RequestMapping("/api/invite")
 class InvitationController(private val invitationService: InvitationService) {
 
-    @PostMapping("/organisation/{organisationId}/email/{email}")
-    fun inviteToOrganisation(@PathVariable organisationId: UUID, @PathVariable email: String, @RequestParam(name = "user", required = false) userId: UUID?): ResponseEntity<OrganisationInvite> {
-        val invite: OrganisationInvite = invitationService.createInvitation(organisationId, email, userId)
-        return ResponseEntity.status(HttpStatus.CREATED).body(invite)
+    @PostMapping("/organisation/{organisationId}/email/{email}/creator/{creatorId}")
+    fun inviteToOrganisation(@PathVariable organisationId: UUID, @PathVariable email: String,
+                             @PathVariable creatorId: UUID, @RequestParam(name = "userId", required = false) userId: UUID?): ResponseEntity<OrgInviteDTO> {
+        val invite: OrganisationInvite = invitationService.createInvitation(organisationId, email, creatorId ,userId)
+        return ResponseEntity.status(HttpStatus.CREATED).body(invite.toDTO())
     }
 
     @PostMapping("/accept/{inviteToken}/email/{email}")
-    fun acceptInvite(@PathVariable inviteToken: String, @PathVariable email: String): ResponseEntity<OrganisationMember> {
+    fun acceptInvite(@PathVariable inviteToken: String, @PathVariable email: String): ResponseEntity<OrgMemberDTO> {
         val organisationMember: OrganisationMember = invitationService.handleInvitationAccept(inviteToken, email)
-        return ResponseEntity.status(HttpStatus.CREATED).body(organisationMember)
+        return ResponseEntity.status(HttpStatus.CREATED).body(organisationMember.toDTO())
     }
 
     @PostMapping("/reject/{inviteToken}/user/{email}")
@@ -37,15 +41,17 @@ class InvitationController(private val invitationService: InvitationService) {
     }
 
     @GetMapping("/organisation/{organisationId}")
-    fun getAllOrganisationInvites(@PathVariable organisationId: UUID): ResponseEntity<List<OrganisationInvite>> {
-        val invites: List<OrganisationInvite> = invitationService.getOrganisationInvites(organisationId)
-        return ResponseEntity.ok(invites)
+    fun getAllOrganisationInvites(@PathVariable organisationId: UUID,
+                                  @RequestParam(name = "inviteStatus", required = false) inviteStatus: OrganisationInvite.InviteStatus?
+    ): ResponseEntity<List<OrgInviteDTO>> {
+        val invites: List<OrganisationInvite> = invitationService.getOrganisationInvites(organisationId, inviteStatus)
+        return ResponseEntity.ok(invites.map { it.toDTO() })
     }
 
     @GetMapping("/user/{userId}")
-    fun getAllUserInvites(@PathVariable userId: UUID): ResponseEntity<List<OrganisationInvite>> {
+    fun getAllUserInvites(@PathVariable userId: UUID): ResponseEntity<List<OrgInviteDTO>> {
         val invites: List<OrganisationInvite> = invitationService.getUserInvites(userId)
-        return ResponseEntity.ok(invites)
+        return ResponseEntity.ok(invites.map { it.toDTO() })
     }
 
     @DeleteMapping("/organisation/{organisationId}/email/{email}")

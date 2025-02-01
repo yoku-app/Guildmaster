@@ -21,7 +21,7 @@ class OrganisationController(private val organisationService: OrganisationServic
 
     @GetMapping("/id/{id}")
     fun getOrganisationById(@PathVariable id: UUID): ResponseEntity<OrganisationDTO>{
-        val organisation: OrganisationDTO = this.organisationService.getOrganisationByID(id).toDTO(includeCreator = true)
+        val organisation: OrganisationDTO = this.organisationService.getOrganisationByID(id).toDTO(includeCreator = false)
         return ResponseEntity.ok(organisation)
     }
 

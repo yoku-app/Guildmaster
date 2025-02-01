@@ -1,5 +1,6 @@
 package com.yoku.guildmaster.entity.user
 
+import com.yoku.guildmaster.entity.dto.UserProfilePartialDTO
 import jakarta.persistence.*
 import java.time.ZonedDateTime
 import java.util.*
@@ -60,5 +61,14 @@ data class UserProfile(
 
     enum class Focus {
         RESPONDENT, CREATOR, HYBRID
+    }
+
+    fun toPartialDTO(): UserProfilePartialDTO {
+        return UserProfilePartialDTO(
+            userId = this.userId,
+            displayName = this.displayName,
+            email = this.email,
+            avatarUrl = this.avatarUrl
+        )
     }
 }

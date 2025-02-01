@@ -59,7 +59,6 @@ class OrganisationService(
         }
 
         val entity = Organisation(
-            id = UUID.randomUUID(),
             name = organisation.name,
             description = organisation.description,
             avatarURL = organisation.avatarURL,

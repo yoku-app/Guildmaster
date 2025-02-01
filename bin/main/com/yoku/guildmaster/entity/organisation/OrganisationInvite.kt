@@ -11,6 +11,9 @@ import java.util.UUID
     indexes = [
         Index(name = "idx_invite_user_id", columnList = "user_id"),
         Index(name = "idx_invite_invite_token", columnList = "invite_token")
+    ],
+    uniqueConstraints = [
+        UniqueConstraint(name = "unique_invite", columnNames = ["email", "organisation_id", "invite_code"])
     ]
 )
 data class OrganisationInvite(
@@ -20,7 +23,7 @@ data class OrganisationInvite(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organisation_id")
     val organisation: Organisation,
-    @Column(name = "user_id")
+    @ManyT
     val userId: UUID?,
     @Column(name = "email")
     val email: String,

@@ -1,11 +1,11 @@
 package com.yoku.guildmaster.entity.organisation
 
 import com.yoku.guildmaster.entity.dto.OrganisationDTO
+import com.yoku.guildmaster.entity.dto.OrganisationPartialDTO
 import com.yoku.guildmaster.entity.lookups.Industry
 import com.yoku.guildmaster.entity.user.UserProfile
 import jakarta.persistence.*
 import java.time.ZonedDateTime
-import java.util.Date
 import java.util.UUID
 
 @Entity
@@ -20,9 +20,11 @@ import java.util.UUID
     ]
 )
 data class Organisation(
+
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    var id: UUID,
+    @GeneratedValue
+    @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
+    val id: UUID? = null,
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "org_industry_id", nullable = false)
@@ -79,7 +81,7 @@ data class Organisation(
 
     fun toDTO(includeCreator: Boolean = false): OrganisationDTO {
         return OrganisationDTO(
-            id = this.id,
+            id = this.id ?: UUID.randomUUID(),
             name = this.name,
             description = this.description,
             email = this.email,
@@ -90,6 +92,16 @@ data class Organisation(
             averageSurveyReviewRating = this.averageSurveyReviewRating,
             industry = this.industry,
             creator = if(includeCreator) this.creator else null
+        )
+    }
+
+    fun toPartialDTO(): OrganisationPartialDTO {
+        return OrganisationPartialDTO(
+            id = this.id ?: UUID.randomUUID(),
+            name = this.name,
+            description = this.description,
+            avatarURL = this.avatarURL,
+            publicStatus = this.publicStatus
         )
     }
 }

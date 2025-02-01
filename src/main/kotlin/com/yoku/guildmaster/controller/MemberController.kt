@@ -1,6 +1,7 @@
 package com.yoku.guildmaster.controller
 
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
+import com.yoku.guildmaster.entity.dto.OrganisationDTO
 import com.yoku.guildmaster.service.MemberService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -21,8 +22,14 @@ class MemberController(private val memberService: MemberService) {
         return ResponseEntity.ok(members)
     }
 
-    @DeleteMapping("{userId}/organisation/{organisationId}")
-    fun removeMemberFromOrganisation(@PathVariable userId: UUID, @PathVariable organisationId: UUID, @RequestHeader("X-User-ID") requesterUserId: UUID): ResponseEntity<Unit>{
+    @GetMapping("/user/{userId}")
+    fun getUserOrganisations(@PathVariable userId: UUID): ResponseEntity<List<OrgMemberDTO>>{
+        val organisations: List<OrgMemberDTO> = this.memberService.fetchUserOrganisations(userId)
+        return ResponseEntity.ok(organisations)
+    }
+
+    @DeleteMapping("/user/{userId}/organisation/{organisationId}/originUserId/{requesterUserId}")
+    fun removeMemberFromOrganisation(@PathVariable userId: UUID, @PathVariable organisationId: UUID, @PathVariable requesterUserId: UUID): ResponseEntity<Unit>{
         this.memberService.removeMemberFromOrganisation(organisationId, userId, requesterUserId)
         return ResponseEntity.ok().build()
     }

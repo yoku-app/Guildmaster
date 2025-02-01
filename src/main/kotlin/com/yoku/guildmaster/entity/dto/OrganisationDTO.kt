@@ -20,19 +20,30 @@ data class OrganisationDTO(
     val creator: UserProfile?, // Creator of the organisation
 )
 
+data class OrganisationPartialDTO(
+    val id: UUID,
+    val name: String,
+    val description: String,
+    val avatarURL: String?,
+    val publicStatus: Boolean,
+)
+
 data class OrgMemberDTO(
     val id: UUID,
     val displayName: String,
     val email: String,
     val avatarUrl: String?,
+    val memberSince: ZonedDateTime,
+    val organisation: OrganisationPartialDTO
 )
 
 data class OrgInviteDTO(
     val id: UUID,
-    val organisationId: UUID,
+    val organisation: OrganisationPartialDTO,
+    val user: UserProfilePartialDTO?,
     val email: String,
     val token: String,
-    val status: OrganisationInvite.InviteStatus,
+    val inviteStatus: OrganisationInvite.InviteStatus,
     val createdAt: ZonedDateTime,
     val expiresAt: ZonedDateTime
 )
