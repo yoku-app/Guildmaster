@@ -16,4 +16,6 @@ interface OrganisationInviteRepository: JpaRepository<OrganisationInvite, UUID> 
     fun findByOrganisationAndEmailAndInviteStatus(organisation: Organisation, email: String, inviteStatus: OrganisationInvite.InviteStatus): Optional<OrganisationInvite>
     @Query("SELECT i FROM OrganisationInvite i WHERE i.organisation.id = :organisationId AND i.inviteStatus = :inviteStatus")
     fun findByOrganisationIdAndStatus(organisationId: UUID, inviteStatus: OrganisationInvite.InviteStatus): List<OrganisationInvite>
+    @Query("SELECT i FROM OrganisationInvite i WHERE i.user.userId = :userId AND i.inviteStatus = :inviteStatus")
+    fun findByUserIdAndStatus(userId: UUID, inviteStatus: OrganisationInvite.InviteStatus): List<OrganisationInvite>
 }

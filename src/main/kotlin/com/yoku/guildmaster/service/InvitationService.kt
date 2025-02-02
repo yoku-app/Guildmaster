@@ -87,6 +87,7 @@ class InvitationService(
      *
      * @return OrganisationMember object representing the user that has been added to the organisation
      */
+    @Transactional
     @Throws(InvitationNotFoundException::class, InvalidArgumentException::class)
     fun handleInvitationAccept(token: String, userEmail: String): OrganisationMember{
         // Validate Invitation
@@ -112,6 +113,7 @@ class InvitationService(
      * @throws InvalidArgumentException If the invitation is no longer valid or the email does not match the invitation
      * @throws InvitationNotFoundException If the invitation is not found
      */
+    @Transactional
     @Throws(InvalidArgumentException::class, InvitationNotFoundException::class)
     fun handleInvitationReject(token: String, userEmail: String){
         val invite: OrganisationInvite = findInvitationThroughTokenOrThrow(token);
@@ -142,8 +144,12 @@ class InvitationService(
      * @param userId The user ID to fetch all invitations for
      * @return List of OrganisationInvite objects
      */
-    fun getUserInvites(userId: UUID): List<OrganisationInvite>{
-        return organisationInviteRepository.findByUserId(userId)
+    fun getUserInvites(userId: UUID, status: OrganisationInvite.InviteStatus?): List<OrganisationInvite>{
+        if(status == null){
+            return organisationInviteRepository.findByUserId(userId)
+        }
+
+        return organisationInviteRepository.findByUserIdAndStatus(userId, status)
     }
 
     fun revokeInvitation(organisationId: UUID, email: String){
@@ -192,7 +198,7 @@ class InvitationService(
     private fun validateInviteOwnership(invite: OrganisationInvite, userEmail: String){
         // Ensure Invite is still valid
         if(!invite.isInvitationValid()){
-            throw InvalidArgumentException("Invitation has expired")
+            throw InvalidArgumentException("Invitation is no longer valid")
         }
 
         if(userEmail != invite.email){

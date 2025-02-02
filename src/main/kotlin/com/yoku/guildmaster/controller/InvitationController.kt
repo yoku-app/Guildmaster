@@ -34,7 +34,7 @@ class InvitationController(private val invitationService: InvitationService) {
         return ResponseEntity.status(HttpStatus.CREATED).body(organisationMember.toDTO())
     }
 
-    @PostMapping("/reject/{inviteToken}/user/{email}")
+    @PostMapping("/reject/{inviteToken}/email/{email}")
     fun rejectInvite(@PathVariable inviteToken: String, @PathVariable email: String): ResponseEntity<Unit> {
         invitationService.handleInvitationReject(inviteToken, email)
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
@@ -49,8 +49,10 @@ class InvitationController(private val invitationService: InvitationService) {
     }
 
     @GetMapping("/user/{userId}")
-    fun getAllUserInvites(@PathVariable userId: UUID): ResponseEntity<List<OrgInviteDTO>> {
-        val invites: List<OrganisationInvite> = invitationService.getUserInvites(userId)
+    fun getAllUserInvites(@PathVariable userId: UUID,
+                          @RequestParam(name = "inviteStatus", required = false) inviteStatus: OrganisationInvite.InviteStatus?
+    ): ResponseEntity<List<OrgInviteDTO>> {
+        val invites: List<OrganisationInvite> = invitationService.getUserInvites(userId, inviteStatus)
         return ResponseEntity.ok(invites.map { it.toDTO() })
     }
 
