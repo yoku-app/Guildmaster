@@ -5,8 +5,7 @@ import com.yoku.guildmaster.entity.user.UserProfile
 import jakarta.persistence.*
 import java.io.Serializable
 import java.time.ZonedDateTime
-import java.util.Date
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(
@@ -31,7 +30,12 @@ data class OrganisationMember(
     @MapsId("organisationId")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "organisation_id", nullable = false)
-    val organisation: Organisation
+    val organisation: Organisation,
+
+    @MapsId("positionId")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "position_id", nullable = false)
+    val position: OrganisationPosition
 ) {
     @Embeddable
     data class OrganisationMemberKey(

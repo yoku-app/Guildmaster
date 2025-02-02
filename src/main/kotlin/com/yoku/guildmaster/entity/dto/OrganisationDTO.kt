@@ -47,3 +47,8 @@ data class OrgInviteDTO(
     val createdAt: ZonedDateTime,
     val expiresAt: ZonedDateTime
 )
+
+data class OrgPositionDTO(
+    val id: UUID,
+    val name: String
+)

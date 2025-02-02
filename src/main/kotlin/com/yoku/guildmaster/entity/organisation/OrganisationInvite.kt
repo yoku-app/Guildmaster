@@ -3,13 +3,8 @@ package com.yoku.guildmaster.entity.organisation
 import com.yoku.guildmaster.entity.dto.OrgInviteDTO
 import com.yoku.guildmaster.entity.user.UserProfile
 import jakarta.persistence.*
-import org.hibernate.annotations.GenericGenerator
-import org.hibernate.annotations.IdGeneratorType
-import java.time.Duration
-import java.time.Instant
 import java.time.ZonedDateTime
-import java.util.Date
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(
