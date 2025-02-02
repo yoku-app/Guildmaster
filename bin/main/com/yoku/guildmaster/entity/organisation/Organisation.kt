@@ -1,7 +1,5 @@
 package com.yoku.guildmaster.entity.organisation
 
-import com.yoku.guildmaster.entity.dto.OrganisationDTO
-import com.yoku.guildmaster.entity.dto.OrganisationPartialDTO
 import com.yoku.guildmaster.entity.lookups.Industry
 import com.yoku.guildmaster.entity.user.UserProfile
 import jakarta.persistence.*
@@ -20,17 +18,15 @@ import java.util.UUID
     ]
 )
 data class Organisation(
-
     @Id
-    @GeneratedValue
-    @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
-    val id: UUID? = null,
+    @GeneratedValue(strategy = GenerationType.UUID)
+    var id: UUID,
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = )
     @JoinColumn(name = "org_industry_id", nullable = false)
     var industry: Industry,
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.E)
     @JoinColumn(name = "org_creator_id", nullable = false)
     var creator: UserProfile,
 
@@ -43,8 +39,8 @@ data class Organisation(
     @Column(name = "org_email", nullable = false, unique = true)
     var email: String,
 
-    @Column(name = "org_member_count", nullable = false, updatable = false)
-    val memberCount: Int = 0,
+    @Column(name = "org_member_count", nullable = false)
+    var memberCount: Int = 0,
 
     @Column(name = "org_avatar_url")
     var avatarURL: String?,
@@ -58,11 +54,11 @@ data class Organisation(
     @Column(name = "updated_at", nullable = false, updatable = false)
     val updatedAt: ZonedDateTime = ZonedDateTime.now(),
 
-    @Column(name = "org_surveys_created", nullable = false,  updatable = false)
-    val surveyCreationCount: Int = 0,
+    @Column(name = "survey_creation_count", nullable = false)
+    var surveyCreationCount: Int = 0,
 
-    @Column(name = "avg_survey_review", nullable = false,  updatable = false)
-    val averageSurveyReviewRating: Double = 0.0,
+    @Column(name = "avg_survey_review", nullable = false)
+    var averageSurveyReviewRating: Double = 0.0,
 
     @OneToMany(mappedBy = "organisation", fetch = FetchType.LAZY)
     val invites: MutableList<OrganisationInvite> = mutableListOf(),
@@ -77,31 +73,5 @@ data class Organisation(
 
     fun addInvite(invite: OrganisationInvite) {
         invites.add(invite)
-    }
-
-    fun toDTO(includeCreator: Boolean = false): OrganisationDTO {
-        return OrganisationDTO(
-            id = this.id ?: UUID.randomUUID(),
-            name = this.name,
-            description = this.description,
-            email = this.email,
-            memberCount = this.memberCount,
-            avatarURL = this.avatarURL,
-            publicStatus = this.publicStatus,
-            surveyCreationCount = this.surveyCreationCount,
-            averageSurveyReviewRating = this.averageSurveyReviewRating,
-            industry = this.industry,
-            creator = if(includeCreator) this.creator else null
-        )
-    }
-
-    fun toPartialDTO(): OrganisationPartialDTO {
-        return OrganisationPartialDTO(
-            id = this.id ?: UUID.randomUUID(),
-            name = this.name,
-            description = this.description,
-            avatarURL = this.avatarURL,
-            publicStatus = this.publicStatus
-        )
     }
 }
