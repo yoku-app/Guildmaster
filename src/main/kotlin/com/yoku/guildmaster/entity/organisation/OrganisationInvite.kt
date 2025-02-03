@@ -54,7 +54,7 @@ data class OrganisationInvite(
 
     fun toOrganisationMember(user: UserProfile): OrganisationMember{
         val organisationMemberKey = OrganisationMember.OrganisationMemberKey(
-            organisationId = this.organisation.id ?: UUID.randomUUID(),
+            organisationId = this.organisation.id ?: throw IllegalStateException("ID should not be null"),
             userId = user.userId
         )
 
@@ -67,7 +67,7 @@ data class OrganisationInvite(
 
     fun toDTO(): OrgInviteDTO {
         return OrgInviteDTO(
-            id = this.id ?: UUID.randomUUID(),
+            id = this.id ?: throw IllegalStateException("ID should not be null"),
             organisation = this.organisation.toPartialDTO(),
             user = this.user?.toPartialDTO(),
             email = this.email,

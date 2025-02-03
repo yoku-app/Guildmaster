@@ -1,7 +1,6 @@
-package com.yoku.guildmaster.entity.lookups;
+package com.yoku.guildmaster.entity.lookups
 
 import jakarta.persistence.*
-import java.util.*
 
 @Entity
 @Table(
@@ -10,35 +9,41 @@ import java.util.*
     indexes = [Index(name = "idx_org_permission_name", columnList = "permission_name")]
 )
 data class OrganisationPermission(
-    @Id @GeneratedValue @Column(
-        columnDefinition = "UUID DEFAULT uuid_generate_v4()",
-        updatable = false,
-        nullable = false
-    ) val id: UUID = UUID.randomUUID(),
+    @Id
+    @Column(name = "id", nullable = false, updatable = false)
+    val id: Int,  // Using static ID instead of UUID
 
-    @Column(name = "permission_name", nullable = false, unique = true) val name: String,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "permission_name", nullable = false, unique = true)
+    val name: Permission,  // Enum now maps by ID
 
-    @Column(name = "permission_description") val description: String? = null,
+    @Column(name = "permission_description")
+    val description: String? = null,
 
-    @Column(name = "requires_hierarchy", nullable = false) val requiresHierarchy: Boolean = false
+    @Column(name = "requires_hierarchy", nullable = false)
+    val requiresHierarchy: Boolean = false
 )
 
-enum class Permission{
-    ORGANISATION_EDIT,
-    ORGANISATION_DELETE,
-    ORGANISATION_VIEW_BILLING,
-    ORGANISATION_MANAGE_BILLING,
-    MEMBER_INVITE,
-    MEMBER_REMOVE,
-    MEMBER_UPDATE_ROLE,
-    ROLE_CREATE,
-    ROLE_DELETE,
-    ROLE_UPDATE,
-    ROLE_ASSIGN_PERMISSION,
-    SURVEY_CREATE,
-    SURVEY_DELETE,
-    SURVEY_EDIT,
-    SURVEY_VIEW_RESULTS,
-    AUDIT_VIEW,
-    AUDIT_DOWNLOAD
+enum class Permission(val id: Int) {
+    ORGANISATION_EDIT(1),
+    ORGANISATION_DELETE(2),
+    ORGANISATION_VIEW_BILLING(3),
+    ORGANISATION_MANAGE_BILLING(4),
+    MEMBER_INVITE(5),
+    MEMBER_REMOVE(6),
+    MEMBER_UPDATE_ROLE(7),
+    ROLE_CREATE(8),
+    ROLE_DELETE(9),
+    ROLE_UPDATE(10),
+    ROLE_ASSIGN_PERMISSION(11),
+    SURVEY_CREATE(12),
+    SURVEY_EDIT(13),
+    SURVEY_DELETE(14),
+    SURVEY_VIEW_RESULTS(15),
+    AUDIT_VIEW(16),
+    AUDIT_DOWNLOAD(17);
+
+    companion object {
+        fun fromId(id: Int): Permission? = entries.find { it.id == id }
+    }
 }

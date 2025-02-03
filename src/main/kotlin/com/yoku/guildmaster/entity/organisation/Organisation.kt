@@ -81,7 +81,7 @@ data class Organisation(
 
     fun toDTO(includeCreator: Boolean = false): OrganisationDTO {
         return OrganisationDTO(
-            id = this.id ?: UUID.randomUUID(),
+            id = this.id ?: throw IllegalStateException("ID should not be null"),
             name = this.name,
             description = this.description,
             email = this.email,
@@ -97,7 +97,7 @@ data class Organisation(
 
     fun toPartialDTO(): OrganisationPartialDTO {
         return OrganisationPartialDTO(
-            id = this.id ?: UUID.randomUUID(),
+            id = this.id ?: throw IllegalStateException("ID should not be null"),
             name = this.name,
             description = this.description,
             avatarURL = this.avatarURL,

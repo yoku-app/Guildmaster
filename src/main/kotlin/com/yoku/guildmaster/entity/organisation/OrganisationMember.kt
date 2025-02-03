@@ -35,7 +35,7 @@ data class OrganisationMember(
     @MapsId("positionId")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "position_id", nullable = false)
-    val position: OrganisationPosition
+    val position: OrganisationPosition? = null
 ) {
     @Embeddable
     data class OrganisationMemberKey(
@@ -53,7 +53,8 @@ data class OrganisationMember(
             email = this.user.email,
             avatarUrl = this.user.avatarUrl,
             memberSince = this.memberSince,
-            organisation = this.organisation.toPartialDTO()
+            organisation = this.organisation.toPartialDTO(),
+            position = this.position?.toPartialDTO() ?: throw IllegalStateException("Position should not be null")
         )
     }
 

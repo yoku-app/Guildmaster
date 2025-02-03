@@ -1,6 +1,8 @@
 package com.yoku.guildmaster.entity.dto
 
 import com.yoku.guildmaster.entity.lookups.Industry
+import com.yoku.guildmaster.entity.lookups.OrganisationPermission
+import com.yoku.guildmaster.entity.lookups.Permission
 import com.yoku.guildmaster.entity.organisation.OrganisationInvite
 import com.yoku.guildmaster.entity.user.UserProfile
 import java.time.ZonedDateTime
@@ -34,7 +36,8 @@ data class OrgMemberDTO(
     val email: String,
     val avatarUrl: String?,
     val memberSince: ZonedDateTime,
-    val organisation: OrganisationPartialDTO
+    val organisation: OrganisationPartialDTO,
+    val position: OrgPositionPartialDTO?
 )
 
 data class OrgInviteDTO(
@@ -49,6 +52,14 @@ data class OrgInviteDTO(
 )
 
 data class OrgPositionDTO(
+    val id: UUID,
+    val organisationId: UUID,
+    val name: String,
+    val rank: Int,
+    val permissions: List<OrganisationPermission>
+)
+
+data class OrgPositionPartialDTO(
     val id: UUID,
     val name: String
 )

@@ -1,7 +1,46 @@
 package com.yoku.guildmaster.service
 
+import com.yoku.guildmaster.entity.dto.OrgPositionDTO
+import com.yoku.guildmaster.entity.organisation.OrganisationPosition
+import com.yoku.guildmaster.repository.OrganisationPositionRepository
 import org.springframework.stereotype.Service
 
 @Service
-class PositionService {
+class PositionService(private val permissionService: PermissionService, private val organisationPositionRepository: OrganisationPositionRepository) {
+
+    fun getOrganisationPosition(){}
+    fun getOrganisationByID(){}
+
+    fun createPosition(position: OrgPositionDTO, isDefault: Boolean = false){
+        val orgPosition = OrganisationPosition(
+            name = position.name,
+            organisationId = position.organisationId,
+            rank = position.rank,
+            isDefault = isDefault
+        )
+
+        if(isDefault){
+            setNewPositionAsDefault(orgPosition)
+        }
+
+
+    }
+
+    fun updatePosition(){}
+
+    fun removePosition(){}
+    fun updatePositionHierarchyRank(){}
+
+    /**
+     * Set the new position as the default position for the organisation
+     * and will remove the default flag from the previous default position
+     */
+    private fun setNewPositionAsDefault(position: OrganisationPosition){}
+
+    private fun addPermissionsToPosition(position: OrganisationPosition, permissions: List<OrganisationPosition>){}
+    private fun removePermissionsFromPosition(position: OrganisationPosition, permissions: List<OrganisationPosition>){}
+
+    fun getOrganisationDefaultPosition(){}
+
+
 }

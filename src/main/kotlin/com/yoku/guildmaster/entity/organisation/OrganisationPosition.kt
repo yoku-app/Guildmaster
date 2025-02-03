@@ -1,6 +1,7 @@
 package com.yoku.guildmaster.entity.organisation
 
 import com.yoku.guildmaster.entity.dto.OrgPositionDTO
+import com.yoku.guildmaster.entity.dto.OrgPositionPartialDTO
 import com.yoku.guildmaster.entity.lookups.OrganisationPermission
 import jakarta.persistence.*
 import java.util.*
@@ -14,36 +15,41 @@ import java.util.*
     ]
 )
 data class OrganisationPosition(
-    @Id @GeneratedValue @Column(
-        columnDefinition = "UUID DEFAULT uuid_generate_v4()",
-        updatable = false,
-        nullable = false
-    ) val id: UUID? = null,
+    @Id
+    @GeneratedValue
+    @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
+    val id: UUID? = null,
 
-    @ManyToOne(fetch = FetchType.EAGER) @JoinColumn(
-        name = "organisation_id",
-        nullable = false
-    ) val organisation: Organisation,
+    @Column(name = "organisation_id", nullable = false)
+    val organisationId: UUID,
 
-    @Column(nullable = false) val name: String,
+    @Column(nullable = false)
+    val name: String,
 
-    @Column(name = "is_default", nullable = false) val isDefault: Boolean = false,
+    @Column(name = "is_default", nullable = false)
+    val isDefault: Boolean = false,
 
-    @Column(nullable = false) val rank: Int,
-
+    @Column(nullable = false)
+    val rank: Int,
+) {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-    name = "org_position_permissions",
-    joinColumns = [JoinColumn(name = "position_id")],
-    inverseJoinColumns = [JoinColumn(name = "permission_id")]
+        name = "org_position_permissions",
+        joinColumns = [JoinColumn(name = "position_id")],
+        inverseJoinColumns = [JoinColumn(name = "permission_id")]
     )
-    val permissions: List<OrganisationPermission> = mutableListOf()
+    val permissions: MutableList<OrganisationPermission> = mutableListOf()
 
-){
-    fun toDTO(): OrgPositionDTO {
-        return OrgPositionDTO(
-            id = this.id ?: UUID.randomUUID(),
-            name = this.name,
-        )
-    }
+    fun toDTO(): OrgPositionDTO = OrgPositionDTO(
+        id = this.id ?: throw IllegalStateException("ID should not be null"),
+        name = this.name,
+        permissions = this.permissions,
+        organisationId = this.organisationId,
+        rank = this.rank,
+    )
+
+    fun toPartialDTO(): OrgPositionPartialDTO = OrgPositionPartialDTO(
+        id = this.id ?: throw IllegalStateException("ID should not be null"),
+        name = this.name
+    )
 }
