@@ -1,10 +1,12 @@
 package com.yoku.guildmaster.service
 
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
+import com.yoku.guildmaster.entity.lookups.Permission
 import com.yoku.guildmaster.entity.organisation.Organisation
 import com.yoku.guildmaster.entity.organisation.OrganisationInvite
 import com.yoku.guildmaster.entity.organisation.OrganisationMember
 import com.yoku.guildmaster.entity.organisation.OrganisationMember.OrganisationMemberKey
+import com.yoku.guildmaster.entity.organisation.OrganisationPosition
 import com.yoku.guildmaster.entity.user.UserProfile
 import com.yoku.guildmaster.exceptions.InvalidArgumentException
 import com.yoku.guildmaster.exceptions.InvalidOrganisationPermissionException
@@ -16,7 +18,11 @@ import kotlin.Throws
 
 
 @Service
-class MemberService(private val organisationService: OrganisationService, private val organisationMemberRepository: OrganisationMemberRepository) {
+class MemberService(private val organisationService: OrganisationService,
+                    private val organisationMemberRepository: OrganisationMemberRepository,
+                    private val positionService: PositionService,
+                    private val permissionService: PermissionService,
+) {
 
     @Throws(InvalidArgumentException::class, OrganisationNotFoundException::class)
     fun fetchOrganisationMembers(id: UUID): List<OrgMemberDTO>{
@@ -55,10 +61,21 @@ class MemberService(private val organisationService: OrganisationService, privat
             throw InvalidOrganisationPermissionException("User must transfer ownership before being removed from the organisation")
         }
 
-        //If this is not the user trying to self-leave, check if the user has the correct permissions to remove another user
-        //todo: User Permissions..
-        if(member.id.userId != requesterUserId && !member.hasPermission()){
-                throw InvalidOrganisationPermissionException("User does not have the correct permissions to remove another user")
+        //If the requester is trying to leave on their on will, remove them from the organisation
+        if(member.id.userId == requesterUserId ){
+            // Remove the user from the organisation
+            organisationMemberRepository.deleteById(OrganisationMemberKey(organisationId, userId))
+        }
+
+        // Validate that the requester has the necessary permissions to remove a user from the organisation and
+        // is of a higher ranking than the user they are trying to remove
+
+        val requesterPosition: OrganisationPosition = positionService.getUserPositionWithPermissions(organisationId, requesterUserId)
+        val memberPosition: OrganisationPosition = positionService.getUserPositionWithPermissions(organisationId, userId)
+
+        if(!permissionService.userHasPermission(requesterPosition, Permission.MEMBER_REMOVE, memberPosition)){
+            throw InvalidOrganisationPermissionException("User does not have permission to remove members from the organisation, " +
+                    "or is of a lower ranked role to the target")
         }
 
         // Remove the user from the organisation

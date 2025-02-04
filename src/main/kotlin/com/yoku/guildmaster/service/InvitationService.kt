@@ -1,8 +1,10 @@
 package com.yoku.guildmaster.service
 
+import com.yoku.guildmaster.entity.lookups.Permission
 import com.yoku.guildmaster.entity.organisation.Organisation
 import com.yoku.guildmaster.entity.organisation.OrganisationInvite
 import com.yoku.guildmaster.entity.organisation.OrganisationMember
+import com.yoku.guildmaster.entity.organisation.OrganisationPosition
 import com.yoku.guildmaster.entity.user.UserProfile
 import com.yoku.guildmaster.exceptions.InvalidArgumentException
 import com.yoku.guildmaster.exceptions.InvitationNotFoundException
@@ -10,7 +12,6 @@ import com.yoku.guildmaster.exceptions.OrganisationNotFoundException
 import com.yoku.guildmaster.repository.OrganisationInviteRepository
 import jakarta.transaction.Transactional
 import okhttp3.Request
-import org.springframework.kafka.security.jaas.KafkaJaasLoginModuleInitializer
 import org.springframework.stereotype.Service
 import java.util.UUID
 import kotlin.jvm.Throws
@@ -21,6 +22,8 @@ class InvitationService(
     private val organisationService: OrganisationService,
     private val httpService: HttpService,
     private val organisationMemberService: MemberService,
+    private val positionService: PositionService,
+    private val permissionService: PermissionService
 ) {
 
     /**
@@ -39,10 +42,9 @@ class InvitationService(
         val organisation: Organisation = organisationService.getOrganisationByID(organisationId)
 
         // Validate the invitation creator is a member of the organisation, and has necessary permissions to extend invitations
-        val creator: OrganisationMember = organisationMemberService.getOrganisationMember(organisationId, invitationCreatorId)
-
-        if(!creator.hasPermission()){
-            throw InvalidArgumentException("User does not have permission to invite users to this organisation")
+        val creatorPosition: OrganisationPosition = positionService.getUserPositionWithPermissions(organisationId, invitationCreatorId)
+        if(!permissionService.userHasPermission(creatorPosition, Permission.MEMBER_INVITE)){
+            throw InvalidArgumentException("User does not have permission to invite users")
         }
 
         // Validate that there is not already an active invitation for this user

@@ -3,13 +3,17 @@ package com.yoku.guildmaster.service
 import com.yoku.guildmaster.entity.dto.OrgPositionDTO
 import com.yoku.guildmaster.entity.organisation.OrganisationPosition
 import com.yoku.guildmaster.repository.OrganisationPositionRepository
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class PositionService(private val permissionService: PermissionService, private val organisationPositionRepository: OrganisationPositionRepository) {
 
-    fun getOrganisationPosition(){}
-    fun getOrganisationByID(){}
+    @Cacheable("organisation.position.user", key = "#organisationId + '-' + #userId")
+    fun getUserPositionWithPermissions(organisationId: UUID, userId: UUID): OrganisationPosition {
+        return organisationPositionRepository.findUserPositionWithPermissions(organisationId, userId)?: throw Exception("Position not found")
+    }
 
     fun createPosition(position: OrgPositionDTO, isDefault: Boolean = false){
         val orgPosition = OrganisationPosition(
@@ -22,8 +26,6 @@ class PositionService(private val permissionService: PermissionService, private 
         if(isDefault){
             setNewPositionAsDefault(orgPosition)
         }
-
-
     }
 
     fun updatePosition(){}
@@ -41,6 +43,7 @@ class PositionService(private val permissionService: PermissionService, private 
     private fun removePermissionsFromPosition(position: OrganisationPosition, permissions: List<OrganisationPosition>){}
 
     fun getOrganisationDefaultPosition(){}
+
 
 
 }

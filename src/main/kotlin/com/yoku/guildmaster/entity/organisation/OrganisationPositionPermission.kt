@@ -29,6 +29,6 @@ data class OrganisationPositionPermission(
     @Embeddable
     data class OrganisationPositionPermissionKey(
         @Column(name = "position_id", nullable = false) val positionId: UUID? = null,
-        @Column(name = "permission_id", nullable = false) val permissionId: Permission
+        @Column(name = "permission_id", nullable = false) val permissionId: Int
     ) : Serializable
 }

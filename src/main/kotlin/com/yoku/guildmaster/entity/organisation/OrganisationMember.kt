@@ -58,8 +58,4 @@ data class OrganisationMember(
         )
     }
 
-    fun hasPermission(): Boolean {
-        return true
-    }
-
 }

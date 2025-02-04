@@ -1,7 +1,9 @@
 package com.yoku.guildmaster.service
 
 import com.yoku.guildmaster.entity.dto.OrganisationDTO
+import com.yoku.guildmaster.entity.lookups.Permission
 import com.yoku.guildmaster.entity.organisation.Organisation
+import com.yoku.guildmaster.entity.organisation.OrganisationPosition
 import com.yoku.guildmaster.exceptions.InvalidArgumentException
 import com.yoku.guildmaster.exceptions.InvalidOrganisationPermissionException
 import com.yoku.guildmaster.exceptions.OrganisationNotFoundException
@@ -13,6 +15,8 @@ import kotlin.jvm.Throws
 @Service
 class OrganisationService(
     private val organisationRepository: OrganisationRepository,
+    private val positionService: PositionService,
+    private val permissionService: PermissionService
 ) {
 
     @Throws(InvalidArgumentException::class, OrganisationNotFoundException::class)
@@ -27,8 +31,10 @@ class OrganisationService(
 
     @Throws(OrganisationNotFoundException::class, InvalidOrganisationPermissionException::class)
     fun updateOrganisation(updaterUserId: UUID, organisation: OrganisationDTO): OrganisationDTO{
-        // todo: Validate Users Organisation permissions for ORG Crud
-        if(false){
+        // Validate user's permissions
+        val userPosition: OrganisationPosition = positionService.getUserPositionWithPermissions(organisation.id, updaterUserId)
+
+        if(!permissionService.userHasPermission(userPosition, Permission.ORGANISATION_EDIT)){
             throw InvalidOrganisationPermissionException("User does not have permission to update Organisation")
         }
 
@@ -85,8 +91,8 @@ class OrganisationService(
     }
 
     fun deleteOrganisation(id: UUID, userId: UUID){
-        //todo: Validate Users Organisation permissions for ORG Crud
-        if(false){
+        val userPosition: OrganisationPosition = positionService.getUserPositionWithPermissions(id, userId)
+        if(!permissionService.userHasPermission(userPosition, Permission.ORGANISATION_DELETE)){
             throw InvalidOrganisationPermissionException("User does not have permission to delete Organisation")
         }
         this.organisationRepository.deleteById(id)

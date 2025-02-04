@@ -53,4 +53,9 @@ class GlobalExceptionHandler {
     fun handleInvitationNotFoundException(ex: InvitationNotFoundException): ResponseEntity<ErrorResponse> {
         return handleException(ex, HttpStatus.NOT_FOUND, true)
     }
+
+    @ExceptionHandler(OrganisationPositionNotFoundException::class)
+    fun handleOrganisationPositionNotFoundException(ex: OrganisationPositionNotFoundException): ResponseEntity<ErrorResponse> {
+        return handleException(ex, HttpStatus.NOT_FOUND, true)
+    }
 }
