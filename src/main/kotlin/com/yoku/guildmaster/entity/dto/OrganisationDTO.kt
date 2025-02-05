@@ -5,6 +5,7 @@ import com.yoku.guildmaster.entity.lookups.OrganisationPermission
 import com.yoku.guildmaster.entity.lookups.Permission
 import com.yoku.guildmaster.entity.organisation.OrganisationInvite
 import com.yoku.guildmaster.entity.user.UserProfile
+import org.apache.kafka.common.protocol.types.Field.Bool
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -56,7 +57,8 @@ data class OrgPositionDTO(
     val organisationId: UUID,
     val name: String,
     val rank: Int,
-    val permissions: List<OrganisationPermission>
+    val permissions: List<OrganisationPermission>,
+    val isDefault: Boolean
 )
 
 data class OrgPositionPartialDTO(

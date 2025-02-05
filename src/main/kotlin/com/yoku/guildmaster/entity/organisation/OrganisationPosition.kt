@@ -24,13 +24,13 @@ data class OrganisationPosition(
     val organisationId: UUID,
 
     @Column(nullable = false)
-    val name: String,
+    var name: String,
 
     @Column(name = "is_default", nullable = false)
-    val isDefault: Boolean = false,
+    var isDefault: Boolean = false,
 
     @Column(nullable = false)
-    val rank: Int,
+    var rank: Int,
 ) {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -38,7 +38,7 @@ data class OrganisationPosition(
         joinColumns = [JoinColumn(name = "position_id")],
         inverseJoinColumns = [JoinColumn(name = "permission_id")]
     )
-    val permissions: MutableList<OrganisationPermission> = mutableListOf()
+    var permissions: MutableList<OrganisationPermission> = mutableListOf()
 
     fun toDTO(): OrgPositionDTO = OrgPositionDTO(
         id = this.id ?: throw IllegalStateException("ID should not be null"),
@@ -46,6 +46,7 @@ data class OrganisationPosition(
         permissions = this.permissions,
         organisationId = this.organisationId,
         rank = this.rank,
+        isDefault = this.isDefault
     )
 
     fun toPartialDTO(): OrgPositionPartialDTO = OrgPositionPartialDTO(

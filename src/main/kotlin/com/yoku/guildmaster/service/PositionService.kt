@@ -1,49 +1,117 @@
 package com.yoku.guildmaster.service
 
+import com.yoku.guildmaster.entity.dto.OrgMemberDTO
 import com.yoku.guildmaster.entity.dto.OrgPositionDTO
+import com.yoku.guildmaster.entity.lookups.OrganisationPermission
 import com.yoku.guildmaster.entity.organisation.OrganisationPosition
+import com.yoku.guildmaster.exceptions.OrganisationNotFoundException
+import com.yoku.guildmaster.exceptions.OrganisationPositionNotFoundException
 import com.yoku.guildmaster.repository.OrganisationPositionRepository
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.UUID
+import kotlin.Throws
+
 
 @Service
-class PositionService(private val permissionService: PermissionService, private val organisationPositionRepository: OrganisationPositionRepository) {
+class PositionService(private val organisationPositionRepository: OrganisationPositionRepository, private val positionMemberService: PositionMemberService) {
 
-    @Cacheable("organisation.position.user", key = "#organisationId + '-' + #userId")
-    fun getUserPositionWithPermissions(organisationId: UUID, userId: UUID): OrganisationPosition {
-        return organisationPositionRepository.findUserPositionWithPermissions(organisationId, userId)?: throw Exception("Position not found")
+    @Throws(OrganisationPositionNotFoundException::class)
+    private fun getPositionOrThrow(positionId: UUID): OrganisationPosition{
+        return organisationPositionRepository.findById(positionId).orElseThrow { OrganisationPositionNotFoundException("Position not found") }
     }
 
-    fun createPosition(position: OrgPositionDTO, isDefault: Boolean = false){
+    @Throws(OrganisationPositionNotFoundException::class)
+    private fun getPositionOrThrow(position: OrgPositionDTO): OrganisationPosition{
+        return getPositionOrThrow(position.id)
+    }
+
+    @Throws(OrganisationNotFoundException::class)
+    fun getOrganisationDefaultPosition(organisationId: UUID): OrganisationPosition{
+        return organisationPositionRepository.findOrganisationPositionByOrganisationIdAndDefaultIsTrue(organisationId)
+            ?: throw OrganisationNotFoundException("Organisation not found")
+    }
+
+    fun createPosition(position: OrgPositionDTO): OrganisationPosition{
         val orgPosition = OrganisationPosition(
             name = position.name,
             organisationId = position.organisationId,
             rank = position.rank,
-            isDefault = isDefault
         )
 
-        if(isDefault){
+        orgPosition.apply {
+            this.permissions = position.permissions.toMutableList()
+        }
+
+        if(position.isDefault){
             setNewPositionAsDefault(orgPosition)
         }
+
+        return organisationPositionRepository.save(orgPosition)
     }
 
-    fun updatePosition(){}
+    fun updatePosition(position: OrgPositionDTO): OrganisationPosition{
+        val currentPosition: OrganisationPosition = getPositionOrThrow(position)
 
-    fun removePosition(){}
-    fun updatePositionHierarchyRank(){}
+        if(currentPosition.isDefault && !position.isDefault){
+            throw IllegalArgumentException("Cannot remove default flag from default position")
+        }
+
+        if(position.isDefault){
+            setNewPositionAsDefault(currentPosition)
+        }
+
+        currentPosition.apply {
+            this.name = position.name
+            this.rank = position.rank
+        }
+
+        // Find permission changes
+        val (toAdd, toRemove) = findAlteredPermissions(currentPosition.permissions, position.permissions)
+
+        // Directly modify JPA-managed permissions collection
+        currentPosition.permissions.apply {
+            addAll(toAdd)
+            removeAll(toRemove)
+        }
+
+        // Saving the entity will automatically update the join table
+        organisationPositionRepository.save(currentPosition)
+
+        positionMemberService.evictUserPositionCache(position.id)
+
+        return currentPosition
+    }
 
     /**
-     * Set the new position as the default position for the organisation
-     * and will remove the default flag from the previous default position
+     * Remove a position from the organisation, and move any existing members to a new specified position
      */
-    private fun setNewPositionAsDefault(position: OrganisationPosition){}
+    fun removePosition(positionId: UUID, newPositionId: UUID): Unit{
+        val newPosition = getPositionOrThrow(newPositionId)
 
-    private fun addPermissionsToPosition(position: OrganisationPosition, permissions: List<OrganisationPosition>){}
-    private fun removePermissionsFromPosition(position: OrganisationPosition, permissions: List<OrganisationPosition>){}
+        // Move all members to the new position
+        positionMemberService.moveMembersToPosition(positionId, newPosition.id!!)
+        // Remove the position
+        organisationPositionRepository.deleteById(positionId)
+        positionMemberService.evictUserPositionCache(positionId)
+    }
 
-    fun getOrganisationDefaultPosition(){}
 
+    /**
+     * Find the permissions that have been added and removed from the position
+     *
+     * @return Pair of added and removed permissions (Pair<Added, Removed>)
+     */
+    private fun findAlteredPermissions(prevPermissions: List<OrganisationPermission>, currPermissions: List<OrganisationPermission>):
+            Pair<List<OrganisationPermission>, List<OrganisationPermission>>{
 
+        val addedPermissions = currPermissions.filter { permission -> !prevPermissions.contains(permission) }
+        val removedPermissions = prevPermissions.filter { permission -> !currPermissions.contains(permission) }
 
+        return Pair(addedPermissions, removedPermissions)
+    }
+
+    private fun setNewPositionAsDefault(position: OrganisationPosition) {
+        organisationPositionRepository.clearDefaultPosition(position.organisationId)
+        position.isDefault = true
+    }
 }

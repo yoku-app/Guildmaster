@@ -20,7 +20,7 @@ import kotlin.Throws
 @Service
 class MemberService(private val organisationService: OrganisationService,
                     private val organisationMemberRepository: OrganisationMemberRepository,
-                    private val positionService: PositionService,
+                    private val positionMemberService: PositionMemberService,
                     private val permissionService: PermissionService,
 ) {
 
@@ -69,9 +69,8 @@ class MemberService(private val organisationService: OrganisationService,
 
         // Validate that the requester has the necessary permissions to remove a user from the organisation and
         // is of a higher ranking than the user they are trying to remove
-
-        val requesterPosition: OrganisationPosition = positionService.getUserPositionWithPermissions(organisationId, requesterUserId)
-        val memberPosition: OrganisationPosition = positionService.getUserPositionWithPermissions(organisationId, userId)
+        val requesterPosition: OrganisationPosition = positionMemberService.getUserPositionWithPermissions(organisationId, requesterUserId)
+        val memberPosition: OrganisationPosition = positionMemberService.getUserPositionWithPermissions(organisationId, userId)
 
         if(!permissionService.userHasPermission(requesterPosition, Permission.MEMBER_REMOVE, memberPosition)){
             throw InvalidOrganisationPermissionException("User does not have permission to remove members from the organisation, " +
