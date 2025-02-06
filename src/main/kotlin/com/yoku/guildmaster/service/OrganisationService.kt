@@ -16,6 +16,7 @@ import kotlin.jvm.Throws
 class OrganisationService(
     private val organisationRepository: OrganisationRepository,
     private val positionService: PositionService,
+    private val positionMemberService: PositionMemberService,
     private val permissionService: PermissionService
 ) {
 
@@ -32,7 +33,7 @@ class OrganisationService(
     @Throws(OrganisationNotFoundException::class, InvalidOrganisationPermissionException::class)
     fun updateOrganisation(updaterUserId: UUID, organisation: OrganisationDTO): OrganisationDTO{
         // Validate user's permissions
-        val userPosition: OrganisationPosition = positionService.getUserPositionWithPermissions(organisation.id, updaterUserId)
+        val userPosition: OrganisationPosition = positionMemberService.getUserPositionWithPermissions(organisation.id, updaterUserId)
 
         if(!permissionService.userHasPermission(userPosition, Permission.ORGANISATION_EDIT)){
             throw InvalidOrganisationPermissionException("User does not have permission to update Organisation")
@@ -91,7 +92,7 @@ class OrganisationService(
     }
 
     fun deleteOrganisation(id: UUID, userId: UUID){
-        val userPosition: OrganisationPosition = positionService.getUserPositionWithPermissions(id, userId)
+        val userPosition: OrganisationPosition = positionMemberService.getUserPositionWithPermissions(id, userId)
         if(!permissionService.userHasPermission(userPosition, Permission.ORGANISATION_DELETE)){
             throw InvalidOrganisationPermissionException("User does not have permission to delete Organisation")
         }

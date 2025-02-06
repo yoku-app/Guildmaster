@@ -22,6 +22,7 @@ class MemberService(private val organisationService: OrganisationService,
                     private val organisationMemberRepository: OrganisationMemberRepository,
                     private val positionMemberService: PositionMemberService,
                     private val permissionService: PermissionService,
+                    private val positionService: PositionService
 ) {
 
     @Throws(InvalidArgumentException::class, OrganisationNotFoundException::class)
@@ -89,6 +90,13 @@ class MemberService(private val organisationService: OrganisationService,
     fun addMemberToOrganisation(invite: OrganisationInvite, user: UserProfile): OrganisationMember{
         // Create a new Organisation Member object
         val member: OrganisationMember = invite.toOrganisationMember(user)
+        val position: OrganisationPosition = positionService.getOrganisationDefaultPosition(
+            invite.organisation.id ?: throw OrganisationNotFoundException("Organisation not found"))
+
+        member.apply {
+            this.position = position
+        }
+
         // Save the new member to the organisation
         return organisationMemberRepository.save(member)
     }

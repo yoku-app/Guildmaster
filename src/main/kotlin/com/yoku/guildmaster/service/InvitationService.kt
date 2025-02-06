@@ -21,8 +21,8 @@ class InvitationService(
     private val organisationInviteRepository: OrganisationInviteRepository,
     private val organisationService: OrganisationService,
     private val httpService: HttpService,
-    private val organisationMemberService: MemberService,
-    private val positionService: PositionService,
+    private val positionMemberService: PositionMemberService,
+    private val memberService: MemberService,
     private val permissionService: PermissionService
 ) {
 
@@ -42,7 +42,7 @@ class InvitationService(
         val organisation: Organisation = organisationService.getOrganisationByID(organisationId)
 
         // Validate the invitation creator is a member of the organisation, and has necessary permissions to extend invitations
-        val creatorPosition: OrganisationPosition = positionService.getUserPositionWithPermissions(organisationId, invitationCreatorId)
+        val creatorPosition: OrganisationPosition = positionMemberService.getUserPositionWithPermissions(organisationId, invitationCreatorId)
         if(!permissionService.userHasPermission(creatorPosition, Permission.MEMBER_INVITE)){
             throw InvalidArgumentException("User does not have permission to invite users")
         }
@@ -103,7 +103,7 @@ class InvitationService(
         // Consume Invite and Add member to organisation
         invite.inviteStatus = OrganisationInvite.InviteStatus.ACCEPTED
         organisationInviteRepository.save(invite)
-        return organisationMemberService.addMemberToOrganisation(invite, user)
+        return memberService.addMemberToOrganisation(invite, user)
     }
 
     /**

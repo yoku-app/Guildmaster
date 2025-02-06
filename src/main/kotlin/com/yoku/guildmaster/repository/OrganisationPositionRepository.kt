@@ -25,4 +25,6 @@ interface OrganisationPositionRepository: JpaRepository<OrganisationPosition, UU
          organisationId: UUID,
          userId: UUID
     ): OrganisationPosition?
+
+    fun findOrganisationPositionsByOrganisationId(organisationId: UUID): List<OrganisationPosition>
 }

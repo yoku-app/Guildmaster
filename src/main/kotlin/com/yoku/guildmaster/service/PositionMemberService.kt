@@ -1,9 +1,11 @@
 package com.yoku.guildmaster.service
 
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
+import com.yoku.guildmaster.entity.organisation.OrganisationMember
 import com.yoku.guildmaster.entity.organisation.OrganisationPosition
+import com.yoku.guildmaster.exceptions.MemberNotFoundException
+import com.yoku.guildmaster.exceptions.OrganisationNotFoundException
 import com.yoku.guildmaster.repository.OrganisationMemberRepository
-import com.yoku.guildmaster.repository.OrganisationPositionRepository
 import com.yoku.guildmaster.service.cache.CachePositionService
 import org.springframework.stereotype.Service
 import java.util.*
@@ -29,4 +31,15 @@ class PositionMemberService(
     fun moveMembersToPosition(fromPositionId: UUID, toPositionId: UUID): Unit{
         organisationMemberRepository.updateByPositionId(fromPositionId, toPositionId)
     }
+
+    fun moveMemberToPosition(memberId: UUID, fromPositionId: UUID, toPosition: OrganisationPosition): OrganisationMember{
+        val member: OrganisationMember = organisationMemberRepository.findByPositionIdAndUserUserId(fromPositionId, memberId)
+            ?: throw MemberNotFoundException("Member not found in position")
+
+        member.apply {
+            this.position = toPosition
+        }
+        return organisationMemberRepository.save(member)
+    }
+
 }

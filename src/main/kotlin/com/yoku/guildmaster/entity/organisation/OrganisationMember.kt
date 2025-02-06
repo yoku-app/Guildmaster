@@ -35,7 +35,7 @@ data class OrganisationMember(
     @MapsId("positionId")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "position_id", nullable = false)
-    val position: OrganisationPosition? = null
+    var position: OrganisationPosition? = null
 ) {
     @Embeddable
     data class OrganisationMemberKey(

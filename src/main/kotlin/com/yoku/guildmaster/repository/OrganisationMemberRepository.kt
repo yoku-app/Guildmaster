@@ -10,11 +10,13 @@ import java.util.*
 interface OrganisationMemberRepository: JpaRepository<OrganisationMember, OrganisationMember.OrganisationMemberKey>{
     fun findByIdOrganisationId(organisationId: UUID): List<OrganisationMember>
     fun findByIdUserId(userId: UUID): List<OrganisationMember>
-    fun findByUser(user: UserProfile): List<OrganisationMember>
     fun findByPositionId(positionId: UUID): List<OrganisationMember>
 
     @Modifying
     @Query("UPDATE OrganisationMember om SET om.position = (SELECT op FROM OrganisationPosition op WHERE op.id = :newPositionId) WHERE om.position.id = :positionId")
     fun updateByPositionId(positionId: UUID, newPositionId: UUID): Int
+
+    @Query
+    fun findByPositionIdAndUserUserId(positionId: UUID, userId: UUID): OrganisationMember?
 
 }
