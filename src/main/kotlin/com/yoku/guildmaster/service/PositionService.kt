@@ -31,8 +31,9 @@ class PositionService(
         return getPositionOrThrow(position.id)
     }
 
-    fun getOrganisationPositions(organisationId: UUID): List<OrganisationPosition>{
+    fun getOrganisationPositions(organisationId: UUID): List<OrgPositionDTO>{
         return organisationPositionRepository.findOrganisationPositionsByOrganisationId(organisationId)
+            .map { it.toDTO() }
     }
 
     @Throws(OrganisationNotFoundException::class)
@@ -44,7 +45,7 @@ class PositionService(
     /**
      *  Create a new position in the organisation
      */
-    fun createPosition(position: OrgPositionDTO, requesterId: UUID): OrganisationPosition{
+    fun createPosition(position: OrgPositionDTO, requesterId: UUID): OrgPositionDTO{
 
         // Validate User has permission to create a new position
         val userPosition = positionMemberService.getUserPositionWithPermissions(position.organisationId, requesterId)
@@ -66,13 +67,13 @@ class PositionService(
             setNewPositionAsDefault(orgPosition)
         }
 
-        return organisationPositionRepository.save(orgPosition)
+        return organisationPositionRepository.save(orgPosition).toDTO()
     }
 
     /**
      * Update a position in the organisation
      */
-    fun updatePosition(position: OrgPositionDTO, requesterId: UUID): OrganisationPosition{
+    fun updatePosition(position: OrgPositionDTO, requesterId: UUID): OrgPositionDTO{
 
         // Validate User has permission to update a position
         val userPosition = positionMemberService.getUserPositionWithPermissions(position.organisationId, requesterId)
@@ -107,7 +108,7 @@ class PositionService(
         // Saving the entity will automatically update the join table
         organisationPositionRepository.save(currentPosition)
         positionMemberService.evictUserPositionCache(position.id)
-        return currentPosition
+        return currentPosition.toDTO()
     }
 
     /**
