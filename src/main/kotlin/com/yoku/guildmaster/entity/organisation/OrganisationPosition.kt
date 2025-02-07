@@ -2,13 +2,13 @@ package com.yoku.guildmaster.entity.organisation
 
 import com.yoku.guildmaster.entity.dto.OrgPositionDTO
 import com.yoku.guildmaster.entity.dto.OrgPositionPartialDTO
-import com.yoku.guildmaster.entity.lookups.OrganisationPermission
 import jakarta.persistence.*
 import java.util.*
 
 @Entity
 @Table(
     name = "org_position",
+    schema = "organisation",
     uniqueConstraints = [UniqueConstraint(columnNames = ["organisation_id", "name"])],
     indexes = [
         Index(name = "idx_org_position_organisation_id", columnList = "organisation_id"),

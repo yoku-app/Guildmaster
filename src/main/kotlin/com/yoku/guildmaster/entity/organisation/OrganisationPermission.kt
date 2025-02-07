@@ -1,10 +1,11 @@
-package com.yoku.guildmaster.entity.lookups
+package com.yoku.guildmaster.entity.organisation
 
 import jakarta.persistence.*
 
 @Entity
 @Table(
     name = "lkp_org_permissions",
+    schema = "organisation",
     uniqueConstraints = [UniqueConstraint(columnNames = ["permission_name"])],
     indexes = [Index(name = "idx_org_permission_name", columnList = "permission_name")]
 )

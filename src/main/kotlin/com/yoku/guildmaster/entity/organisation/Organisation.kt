@@ -2,8 +2,8 @@ package com.yoku.guildmaster.entity.organisation
 
 import com.yoku.guildmaster.entity.dto.OrganisationDTO
 import com.yoku.guildmaster.entity.dto.OrganisationPartialDTO
-import com.yoku.guildmaster.entity.lookups.Industry
-import com.yoku.guildmaster.entity.user.UserProfile
+import com.yoku.guildmaster.entity.dto.UserPartialDTO
+import com.yoku.guildmaster.entity.shared.lookups.IndustryLookupDTO
 import jakarta.persistence.*
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -11,6 +11,7 @@ import java.util.UUID
 @Entity
 @Table(
     name = "organisation",
+    schema = "organisation",
     uniqueConstraints = [
         UniqueConstraint(columnNames = ["org_name"]),
         UniqueConstraint(columnNames = ["org_email"])
@@ -26,13 +27,11 @@ data class Organisation(
     @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
     val id: UUID? = null,
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "org_industry_id", nullable = false)
-    var industry: Industry,
+    @Column(name = "org_industry_id", nullable = false)
+    var industryId: UUID,
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "org_creator_id", nullable = false)
-    var creator: UserProfile,
+    @Column(name = "org_creator_id", nullable = false)
+    var creatorId: UUID,
 
     @Column(name = "org_name", nullable = false, unique = true)
     var name: String,
@@ -71,15 +70,7 @@ data class Organisation(
     val members: MutableList<OrganisationMember> = mutableListOf()
 ) {
 
-    fun addMember(member: OrganisationMember) {
-        members.add(member)
-    }
-
-    fun addInvite(invite: OrganisationInvite) {
-        invites.add(invite)
-    }
-
-    fun toDTO(includeCreator: Boolean = false): OrganisationDTO {
+    fun toDTO(creator: UserPartialDTO, industry: IndustryLookupDTO, includeCreator: Boolean = false): OrganisationDTO {
         return OrganisationDTO(
             id = this.id ?: throw IllegalStateException("ID should not be null"),
             name = this.name,
@@ -90,8 +81,8 @@ data class Organisation(
             publicStatus = this.publicStatus,
             surveyCreationCount = this.surveyCreationCount,
             averageSurveyReviewRating = this.averageSurveyReviewRating,
-            industry = this.industry,
-            creator = if(includeCreator) this.creator else null
+            industry = industry,
+            creator = if(includeCreator) creator else null
         )
     }
 

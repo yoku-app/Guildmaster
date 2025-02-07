@@ -1,4 +1,4 @@
-package com.yoku.guildmaster.service.cache
+package com.yoku.guildmaster.service.cached
 
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
 import com.yoku.guildmaster.entity.organisation.OrganisationPosition
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class CachePositionService(
+class CachedPositionService(
     private val organisationPositionRepository: OrganisationPositionRepository,
     private val redisTemplate: RedisTemplate<String, OrganisationPosition>
 ) {

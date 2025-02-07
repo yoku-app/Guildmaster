@@ -1,6 +1,6 @@
 package com.yoku.guildmaster.service
 
-import com.yoku.guildmaster.entity.lookups.Permission
+import com.yoku.guildmaster.entity.organisation.Permission
 import com.yoku.guildmaster.entity.organisation.Organisation
 import com.yoku.guildmaster.entity.organisation.OrganisationInvite
 import com.yoku.guildmaster.entity.organisation.OrganisationMember
@@ -10,6 +10,7 @@ import com.yoku.guildmaster.exceptions.InvalidArgumentException
 import com.yoku.guildmaster.exceptions.InvitationNotFoundException
 import com.yoku.guildmaster.exceptions.OrganisationNotFoundException
 import com.yoku.guildmaster.repository.OrganisationInviteRepository
+import com.yoku.guildmaster.service.external.HttpService
 import jakarta.transaction.Transactional
 import okhttp3.Request
 import org.springframework.stereotype.Service

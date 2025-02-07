@@ -1,7 +1,7 @@
 package com.yoku.guildmaster.entity.organisation
 
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
-import com.yoku.guildmaster.entity.user.UserProfile
+import com.yoku.guildmaster.entity.dto.UserPartialDTO
 import jakarta.persistence.*
 import java.io.Serializable
 import java.time.ZonedDateTime
@@ -10,6 +10,7 @@ import java.util.*
 @Entity
 @Table(
     name = "org_member",
+    schema = "organisation",
     indexes = [
         Index(name = "idx_member_user_id", columnList = "user_id"),
         Index(name = "idx_member_organisation_id", columnList = "organisation_id")
@@ -22,10 +23,8 @@ data class OrganisationMember(
     @Column(name = "member_since", nullable = false, updatable = false)
     val memberSince: ZonedDateTime = ZonedDateTime.now(),
 
-    @MapsId("userId")
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false)
-    val user: UserProfile,
+    @Column(name = "user_id", nullable = false)
+    val userId: UUID,
 
     @MapsId("organisationId")
     @ManyToOne(fetch = FetchType.EAGER)
@@ -46,12 +45,9 @@ data class OrganisationMember(
         val userId: UUID
     ) : Serializable
 
-    fun toDTO(): OrgMemberDTO {
+    fun toDTO(user: UserPartialDTO): OrgMemberDTO {
         return OrgMemberDTO(
-            id = this.id.userId,
-            displayName = this.user.displayName,
-            email = this.user.email,
-            avatarUrl = this.user.avatarUrl,
+            user = user,
             memberSince = this.memberSince,
             organisation = this.organisation.toPartialDTO(),
             position = this.position?.toPartialDTO() ?: throw IllegalStateException("Position should not be null")

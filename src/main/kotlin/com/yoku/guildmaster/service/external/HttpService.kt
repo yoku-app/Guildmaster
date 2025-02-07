@@ -1,4 +1,4 @@
-package com.yoku.guildmaster.service
+package com.yoku.guildmaster.service.external
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -6,7 +6,6 @@ import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.springframework.core.env.Environment
-import org.springframework.core.env.get
 import org.springframework.stereotype.Service
 import java.io.IOException
 

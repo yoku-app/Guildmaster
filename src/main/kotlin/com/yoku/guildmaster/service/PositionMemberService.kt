@@ -4,16 +4,15 @@ import com.yoku.guildmaster.entity.dto.OrgMemberDTO
 import com.yoku.guildmaster.entity.organisation.OrganisationMember
 import com.yoku.guildmaster.entity.organisation.OrganisationPosition
 import com.yoku.guildmaster.exceptions.MemberNotFoundException
-import com.yoku.guildmaster.exceptions.OrganisationNotFoundException
 import com.yoku.guildmaster.repository.OrganisationMemberRepository
-import com.yoku.guildmaster.service.cache.CachePositionService
+import com.yoku.guildmaster.service.cached.CachedPositionService
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
 class PositionMemberService(
     private val organisationMemberRepository: OrganisationMemberRepository,
-    private val cachedService: CachePositionService) {
+    private val cachedService: CachedPositionService) {
 
     fun getOrganisationPositionMembers(positionId: UUID): List<OrgMemberDTO>{
         return organisationMemberRepository.findByPositionId(positionId).map { it.toDTO() }

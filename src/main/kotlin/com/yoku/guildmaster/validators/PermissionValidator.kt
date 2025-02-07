@@ -1,6 +1,6 @@
 package com.yoku.guildmaster.validators;
 
-import com.yoku.guildmaster.entity.lookups.Permission
+import com.yoku.guildmaster.entity.organisation.Permission
 import com.yoku.guildmaster.repository.lookups.OrganisationPermissionRepository
 import jakarta.annotation.PostConstruct
 import jakarta.transaction.Transactional

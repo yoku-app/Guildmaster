@@ -1,7 +1,5 @@
 package com.yoku.guildmaster.entity.organisation
 
-import com.yoku.guildmaster.entity.lookups.OrganisationPermission
-import com.yoku.guildmaster.entity.lookups.Permission
 import jakarta.persistence.*
 import java.io.Serializable
 import java.util.*

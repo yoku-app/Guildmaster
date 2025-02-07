@@ -1,11 +1,8 @@
 package com.yoku.guildmaster.entity.dto
 
-import com.yoku.guildmaster.entity.lookups.Industry
-import com.yoku.guildmaster.entity.lookups.OrganisationPermission
-import com.yoku.guildmaster.entity.lookups.Permission
+import com.yoku.guildmaster.entity.organisation.OrganisationPermission
 import com.yoku.guildmaster.entity.organisation.OrganisationInvite
-import com.yoku.guildmaster.entity.user.UserProfile
-import org.apache.kafka.common.protocol.types.Field.Bool
+import com.yoku.guildmaster.entity.shared.lookups.IndustryLookupDTO
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -19,8 +16,8 @@ data class OrganisationDTO(
     val publicStatus: Boolean, // Public status of the organisation
     val surveyCreationCount: Int, // Number of surveys created by the organisation
     val averageSurveyReviewRating: Double, // Average rating of surveys created by the organisation
-    val industry: Industry?, // Industry of the organisation
-    val creator: UserProfile?, // Creator of the organisation
+    val industry: IndustryLookupDTO?, // Industry of the organisation
+    val creator: UserPartialDTO?, // Creator of the organisation
 )
 
 data class OrganisationPartialDTO(
@@ -32,10 +29,7 @@ data class OrganisationPartialDTO(
 )
 
 data class OrgMemberDTO(
-    val id: UUID,
-    val displayName: String,
-    val email: String,
-    val avatarUrl: String?,
+    val user: UserPartialDTO,
     val memberSince: ZonedDateTime,
     val organisation: OrganisationPartialDTO,
     val position: OrgPositionPartialDTO?
@@ -44,7 +38,7 @@ data class OrgMemberDTO(
 data class OrgInviteDTO(
     val id: UUID,
     val organisation: OrganisationPartialDTO,
-    val user: UserProfilePartialDTO?,
+    val user: UserPartialDTO?,
     val email: String,
     val token: String,
     val inviteStatus: OrganisationInvite.InviteStatus,

@@ -31,6 +31,11 @@ class PositionController(private val positionService: PositionService, private v
         return ResponseEntity.ok(members)
     }
 
+    @GetMapping("/user/{userId}/organisation/{organisationId}")
+    fun getUserPositionWithPermissions(@PathVariable userId: UUID, @PathVariable organisationId: UUID): OrgPositionDTO{
+        return positionMemberService.getUserPositionWithPermissions(organisationId, userId).toDTO()
+    }
+
     @PostMapping("/userId/{userId}")
     fun createNewPosition(position: OrgPositionDTO, @PathVariable userId: UUID ): ResponseEntity<OrgPositionDTO>{
         val newPosition: OrgPositionDTO = positionService.createPosition(position, userId)

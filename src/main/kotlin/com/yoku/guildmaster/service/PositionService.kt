@@ -1,8 +1,8 @@
 package com.yoku.guildmaster.service
 
 import com.yoku.guildmaster.entity.dto.OrgPositionDTO
-import com.yoku.guildmaster.entity.lookups.OrganisationPermission
-import com.yoku.guildmaster.entity.lookups.Permission
+import com.yoku.guildmaster.entity.organisation.OrganisationPermission
+import com.yoku.guildmaster.entity.organisation.Permission
 import com.yoku.guildmaster.entity.organisation.OrganisationMember
 import com.yoku.guildmaster.entity.organisation.OrganisationPosition
 import com.yoku.guildmaster.exceptions.MemberNotFoundException

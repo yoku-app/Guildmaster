@@ -1,7 +1,7 @@
 package com.yoku.guildmaster.service
 
 import com.yoku.guildmaster.entity.dto.OrganisationDTO
-import com.yoku.guildmaster.entity.lookups.Permission
+import com.yoku.guildmaster.entity.organisation.Permission
 import com.yoku.guildmaster.entity.organisation.Organisation
 import com.yoku.guildmaster.entity.organisation.OrganisationPosition
 import com.yoku.guildmaster.exceptions.InvalidArgumentException
