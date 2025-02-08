@@ -2,33 +2,28 @@ package com.yoku.guildmaster.service.external
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.yoku.guildmaster.configuration.properties.ServiceConnectionConfigurationProperties
+import com.yoku.guildmaster.configuration.properties.ServiceConnectionConfigurationProperties.TargetController
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import java.io.IOException
-
 
 @Service
 class HttpService(
     private val okHttpClient: OkHttpClient,
     private val objectMapper: ObjectMapper,
-    private val environment: Environment
+    private val serviceProperties: ServiceConnectionConfigurationProperties
 ) {
 
     private val mediaTypeJson = "application/json; charset=utf-8".toMediaType()
 
-    private val COLOVIA_SERVICE_URL = environment.getProperty("CORE_SERVICE_URL", "http://localhost:8082/api/");
-
-    enum class TargetController{
-        COLOVIA,
-    }
-
     private fun getServiceURL(target: TargetController): String{
         return when(target){
-            TargetController.COLOVIA -> COLOVIA_SERVICE_URL
-        }
+            TargetController.COLOVIA -> serviceProperties.connections[TargetController.COLOVIA]
+            TargetController.SECUNDA -> serviceProperties.connections[TargetController.SECUNDA]
+        } ?: throw IllegalArgumentException("Target controller not found")
     }
 
     fun generateInternalServiceConnection(target: TargetController, endpoint: String): Request.Builder{
@@ -36,7 +31,19 @@ class HttpService(
             .url("${getServiceURL(target)}$endpoint")
     }
 
+    fun generateInternalServiceConnection(target: TargetController, urlBuilder: (String) -> HttpUrl): Request.Builder{
+        val url: HttpUrl = urlBuilder(getServiceURL(target))
+
+        return Request.Builder()
+            .url(url)
+    }
+
     fun <T> get (builder: Request.Builder, responseType: Class<T>): T?{
+        val request: Request = builder.get().build()
+        return executeRequest(request, responseType)
+    }
+
+    fun <T> get (builder: Request.Builder, responseType: TypeReference<T>): T?{
         val request: Request = builder.get().build()
         return executeRequest(request, responseType)
     }

@@ -29,10 +29,10 @@ data class OrganisationPartialDTO(
 )
 
 data class OrgMemberDTO(
-    val user: UserPartialDTO,
+    val user: UserPartialDTO?,
     val memberSince: ZonedDateTime,
-    val organisation: OrganisationPartialDTO,
-    val position: OrgPositionPartialDTO?
+    val organisation: OrganisationPartialDTO?,
+    val position: OrgPositionPartialDTO
 )
 
 data class OrgInviteDTO(

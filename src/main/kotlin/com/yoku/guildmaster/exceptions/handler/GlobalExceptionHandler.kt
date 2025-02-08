@@ -58,4 +58,9 @@ class GlobalExceptionHandler {
     fun handleOrganisationPositionNotFoundException(ex: OrganisationPositionNotFoundException): ResponseEntity<ErrorResponse> {
         return handleException(ex, HttpStatus.NOT_FOUND, true)
     }
+
+    @ExceptionHandler(UnauthorizedException::class)
+    fun handleUnauthorizedException(ex: UnauthorizedException): ResponseEntity<ErrorResponse> {
+        return handleException(ex, HttpStatus.UNAUTHORIZED, true)
+    }
 }

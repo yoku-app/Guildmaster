@@ -3,6 +3,7 @@ package com.yoku.guildmaster.entity.organisation
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
 import com.yoku.guildmaster.entity.dto.UserPartialDTO
 import jakarta.persistence.*
+import org.hibernate.Hibernate
 import java.io.Serializable
 import java.time.ZonedDateTime
 import java.util.*
@@ -23,11 +24,8 @@ data class OrganisationMember(
     @Column(name = "member_since", nullable = false, updatable = false)
     val memberSince: ZonedDateTime = ZonedDateTime.now(),
 
-    @Column(name = "user_id", nullable = false)
-    val userId: UUID,
-
     @MapsId("organisationId")
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organisation_id", nullable = false)
     val organisation: Organisation,
 
@@ -45,11 +43,16 @@ data class OrganisationMember(
         val userId: UUID
     ) : Serializable
 
-    fun toDTO(user: UserPartialDTO): OrgMemberDTO {
+    fun toDTO(user: UserPartialDTO?, includeOrganisation: Boolean = false): OrgMemberDTO {
+        // Force Lazy rendering of Org if requested
+        if(includeOrganisation){
+            Hibernate.initialize(this.organisation)
+        }
+
         return OrgMemberDTO(
             user = user,
             memberSince = this.memberSince,
-            organisation = this.organisation.toPartialDTO(),
+            organisation = if (includeOrganisation) this.organisation.toPartialDTO() else null,
             position = this.position?.toPartialDTO() ?: throw IllegalStateException("Position should not be null")
         )
     }

@@ -2,17 +2,12 @@ package com.yoku.guildmaster.controller
 
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
 import com.yoku.guildmaster.entity.dto.OrgPositionDTO
+import com.yoku.guildmaster.exceptions.UnauthorizedException
 import com.yoku.guildmaster.service.PositionMemberService
 import com.yoku.guildmaster.service.PositionService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
 @RestController
@@ -27,7 +22,7 @@ class PositionController(private val positionService: PositionService, private v
 
     @GetMapping("/member/{positionId}")
     fun getOrganisationPositionMembers(@PathVariable positionId: UUID): ResponseEntity<List<OrgMemberDTO>>{
-        val members: List<OrgMemberDTO> = positionMemberService.getOrganisationPositionMembers(positionId)
+        val members: List<OrgMemberDTO> = positionMemberService.getOrganisationPositionMembersWithUserProfile(positionId)
         return ResponseEntity.ok(members)
     }
 
@@ -54,10 +49,13 @@ class PositionController(private val positionService: PositionService, private v
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
     }
 
-    @PutMapping("/member/{memberId}/fromPosition/{fromPositionId}/toPosition/{toPositionId}/userId/{userId}")
-    fun moveMemberToPosition(@PathVariable memberId: UUID, @PathVariable fromPositionId: UUID,
-                             @PathVariable toPositionId: UUID, @PathVariable userId: UUID): OrgMemberDTO{
-        return positionService.moveUserToPosition(memberId, fromPositionId, toPositionId, userId).toDTO()
+    @PutMapping("/member/toPosition/{toPositionId}")
+    fun moveMemberToPosition(@RequestBody member: OrgMemberDTO,
+                             @PathVariable toPositionId: UUID,
+                             @RequestHeader("X-User-Id") userId: UUID?): OrgMemberDTO{
+        if(userId == null) throw UnauthorizedException("User Id was not provider in request headers")
+
+        return positionService.moveUserToPosition(member, toPositionId, userId)
     }
 
 }

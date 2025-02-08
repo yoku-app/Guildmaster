@@ -70,7 +70,7 @@ data class Organisation(
     val members: MutableList<OrganisationMember> = mutableListOf()
 ) {
 
-    fun toDTO(creator: UserPartialDTO, industry: IndustryLookupDTO, includeCreator: Boolean = false): OrganisationDTO {
+    fun toDTO(creator: UserPartialDTO?, industry: IndustryLookupDTO?): OrganisationDTO {
         return OrganisationDTO(
             id = this.id ?: throw IllegalStateException("ID should not be null"),
             name = this.name,
@@ -82,7 +82,23 @@ data class Organisation(
             surveyCreationCount = this.surveyCreationCount,
             averageSurveyReviewRating = this.averageSurveyReviewRating,
             industry = industry,
-            creator = if(includeCreator) creator else null
+            creator = creator
+        )
+    }
+
+    fun toDTO(): OrganisationDTO {
+        return OrganisationDTO(
+            id = this.id ?: throw IllegalStateException("ID should not be null"),
+            name = this.name,
+            description = this.description,
+            email = this.email,
+            memberCount = this.memberCount,
+            avatarURL = this.avatarURL,
+            publicStatus = this.publicStatus,
+            surveyCreationCount = this.surveyCreationCount,
+            averageSurveyReviewRating = this.averageSurveyReviewRating,
+            creator = null,
+            industry = null
         )
     }
 

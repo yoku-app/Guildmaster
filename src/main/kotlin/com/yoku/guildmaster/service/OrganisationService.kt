@@ -21,13 +21,14 @@ class OrganisationService(
 ) {
 
     @Throws(InvalidArgumentException::class, OrganisationNotFoundException::class)
-    fun getOrganisationByID(id: UUID): Organisation {
-        return this.findOrganisationByIdOrThrow(id)
+    fun getOrganisationByID(id: UUID): OrganisationDTO {
+        // Fetch Organisation Creator/Industry
+        return this.findOrganisationByIdOrThrow(id).toDTO()
     }
 
     @Throws(OrganisationNotFoundException::class)
-    fun getOrganisationByName(name: String): Organisation{
-        return this.findOrganisationByNameOrThrow(name)
+    fun getOrganisationByName(name: String): OrganisationDTO{
+        return this.findOrganisationByNameOrThrow(name).toDTO()
     }
 
     @Throws(OrganisationNotFoundException::class, InvalidOrganisationPermissionException::class)
@@ -49,8 +50,8 @@ class OrganisationService(
             this.avatarURL = organisation.avatarURL
             this.publicStatus = organisation.publicStatus
             this.email = organisation.email
-            this.creator = organisation.creator?: this.creator
-            this.industry = organisation.industry?: this.industry
+            this.creatorId = organisation.creator?.id ?: this.creatorId
+            this.industryId = organisation.industry?.id ?: this.industryId
         }
 
         return this.organisationRepository.save(entity).toDTO()
@@ -71,8 +72,8 @@ class OrganisationService(
             avatarURL = organisation.avatarURL,
             publicStatus = organisation.publicStatus,
             email = organisation.email,
-            creator = organisation.creator,
-            industry = organisation.industry
+            creatorId = organisation.creator.id,
+            industryId = organisation.industry.id
         )
 
         return this.organisationRepository.save(entity).toDTO()
@@ -80,7 +81,7 @@ class OrganisationService(
 
 
     @Throws(OrganisationNotFoundException::class)
-    private fun findOrganisationByIdOrThrow(id: UUID): Organisation {
+    fun findOrganisationByIdOrThrow(id: UUID): Organisation {
         return this.organisationRepository.findById(id)
             .orElseThrow { OrganisationNotFoundException("Organisation not found") }
     }

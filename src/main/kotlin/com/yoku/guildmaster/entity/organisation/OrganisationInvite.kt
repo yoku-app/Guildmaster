@@ -22,16 +22,12 @@ data class OrganisationInvite(
     @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
     val id: UUID? = null,
 
-    @Version
-    @Column(name = "version")
-    var version: Long = 0,
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "organisation_id")
     val organisation: Organisation,
 
     @Column(name = "user_id")
-    val userId: UUID,
+    val userId: UUID?,
 
     @Column(name = "email")
     val email: String,
@@ -61,12 +57,11 @@ data class OrganisationInvite(
 
         return OrganisationMember(
             id = organisationMemberKey,
-            userId = userId,
             organisation = this.organisation
         )
     }
 
-    fun toDTO(user: UserPartialDTO): OrgInviteDTO {
+    fun toDTO(user: UserPartialDTO?): OrgInviteDTO {
         return OrgInviteDTO(
             id = this.id ?: throw IllegalStateException("ID should not be null"),
             organisation = this.organisation.toPartialDTO(),

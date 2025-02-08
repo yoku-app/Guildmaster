@@ -1,5 +1,6 @@
 package com.yoku.guildmaster.service
 
+import com.yoku.guildmaster.entity.dto.OrgMemberDTO
 import com.yoku.guildmaster.entity.dto.OrgPositionDTO
 import com.yoku.guildmaster.entity.organisation.OrganisationPermission
 import com.yoku.guildmaster.entity.organisation.Permission
@@ -107,7 +108,7 @@ class PositionService(
 
         // Saving the entity will automatically update the join table
         organisationPositionRepository.save(currentPosition)
-        positionMemberService.evictUserPositionCache(position.id)
+        positionMemberService.evictPositionCache(position.id)
         return currentPosition.toDTO()
     }
 
@@ -127,23 +128,36 @@ class PositionService(
         positionMemberService.moveMembersToPosition(positionId, newPosition.id!!)
         // Remove the position
         organisationPositionRepository.deleteById(positionId)
-        positionMemberService.evictUserPositionCache(positionId)
+        positionMemberService.evictPositionCache(positionId)
     }
 
     /**
      * Move a user from one position to another
      */
     @Throws(MemberNotFoundException::class, OrganisationPositionNotFoundException::class)
-    fun moveUserToPosition(memberId: UUID, fromPositionId: UUID, toPositionId: UUID, requesterId: UUID): OrganisationMember{
-        val toPosition = getPositionOrThrow(toPositionId)
+    fun moveUserToPosition(member: OrgMemberDTO, toPositionId: UUID, requesterId: UUID): OrgMemberDTO{
+        if(member.position.id == toPositionId){
+            throw IllegalArgumentException("User is already in the target position")
+        }
 
+        if(member.user == null){
+            throw MemberNotFoundException("User object must be included in request")
+        }
+
+        val toPosition: OrganisationPosition = getPositionOrThrow(toPositionId)
         // Validate User has permission to update a position
         val userPosition = positionMemberService.getUserPositionWithPermissions(toPosition.organisationId, requesterId)
         if(!permissionService.userHasPermission(userPosition, Permission.MEMBER_UPDATE_ROLE)){
             throw IllegalArgumentException("User does not have permission to move other users")
         }
 
-        return positionMemberService.moveMemberToPosition(memberId, fromPositionId, toPosition)
+        val updatedOrgMember: OrganisationMember =
+            positionMemberService.moveMemberToPosition(
+                memberId = member.user.id,
+                fromPositionId = member.position.id,
+                toPosition = toPosition)
+
+        return updatedOrgMember.toDTO(user = member.user, includeOrganisation = false)
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.yoku.guildmaster.service.cached
 
-import com.yoku.guildmaster.entity.dto.OrgMemberDTO
+import com.yoku.guildmaster.entity.organisation.OrganisationMember
 import com.yoku.guildmaster.entity.organisation.OrganisationPosition
 import com.yoku.guildmaster.exceptions.OrganisationNotFoundException
 import com.yoku.guildmaster.exceptions.OrganisationPositionNotFoundException
@@ -27,7 +27,11 @@ class CachedPositionService(
      * Upon a permission change within an Organisation position, we will evict the cache for all
      * relevant users within this specific position
      */
-    fun evictUserPositionCache(positionId: UUID, members: List<OrgMemberDTO>): Unit{
-        redisTemplate.delete(members.map { member -> "organisation.position.user::${member.organisation.id}-${member.id}" })
+    fun evictPositionCache(positionId: UUID, members: List<OrganisationMember>): Unit{
+        redisTemplate.delete(members.map { member -> "organisation.position.user::${member.id.organisationId}-${member.id.userId}" })
+    }
+
+    fun evictUserPositionCache(organisationId: UUID, userId: UUID): Unit{
+        redisTemplate.delete("organisation.position.user::${organisationId}-${userId}")
     }
 }

@@ -1,18 +1,15 @@
 package com.yoku.guildmaster.service
 
-import com.yoku.guildmaster.entity.organisation.Permission
-import com.yoku.guildmaster.entity.organisation.Organisation
-import com.yoku.guildmaster.entity.organisation.OrganisationInvite
-import com.yoku.guildmaster.entity.organisation.OrganisationMember
-import com.yoku.guildmaster.entity.organisation.OrganisationPosition
-import com.yoku.guildmaster.entity.user.UserProfile
+import com.yoku.guildmaster.entity.dto.OrgInviteDTO
+import com.yoku.guildmaster.entity.dto.OrgMemberDTO
+import com.yoku.guildmaster.entity.dto.UserPartialDTO
+import com.yoku.guildmaster.entity.organisation.*
 import com.yoku.guildmaster.exceptions.InvalidArgumentException
 import com.yoku.guildmaster.exceptions.InvitationNotFoundException
 import com.yoku.guildmaster.exceptions.OrganisationNotFoundException
 import com.yoku.guildmaster.repository.OrganisationInviteRepository
-import com.yoku.guildmaster.service.external.HttpService
+import com.yoku.guildmaster.service.external.UserService
 import jakarta.transaction.Transactional
-import okhttp3.Request
 import org.springframework.stereotype.Service
 import java.util.UUID
 import kotlin.jvm.Throws
@@ -21,10 +18,10 @@ import kotlin.jvm.Throws
 class InvitationService(
     private val organisationInviteRepository: OrganisationInviteRepository,
     private val organisationService: OrganisationService,
-    private val httpService: HttpService,
     private val positionMemberService: PositionMemberService,
     private val memberService: MemberService,
-    private val permissionService: PermissionService
+    private val permissionService: PermissionService,
+    private val userService: UserService
 ) {
 
     /**
@@ -32,15 +29,18 @@ class InvitationService(
      *
      * @param organisationId The organisation ID to create the invitation for
      * @param email The email of the user to send the invitation to
-     * @param userId The user ID of the user to send the invitation to
      *
      * @throws OrganisationNotFoundException If the organisation is not found
      */
     @Transactional
     @Throws(OrganisationNotFoundException::class)
-    fun createInvitation(organisationId: UUID, email: String, invitationCreatorId: UUID, userId: UUID?): OrganisationInvite{
+    fun createInvitation(organisationId: UUID, email: String, invitationCreatorId: UUID, user: UserPartialDTO?): OrgInviteDTO{
+        if(user !== null && user.email != email){
+            throw InvalidArgumentException("Email does not match the provided user")
+        }
+
         // Validate organisation existence
-        val organisation: Organisation = organisationService.getOrganisationByID(organisationId)
+        val organisation: Organisation = organisationService.findOrganisationByIdOrThrow(organisationId)
 
         // Validate the invitation creator is a member of the organisation, and has necessary permissions to extend invitations
         val creatorPosition: OrganisationPosition = positionMemberService.getUserPositionWithPermissions(organisationId, invitationCreatorId)
@@ -61,22 +61,17 @@ class InvitationService(
                     "A user may only have one active invite for any given organisation at a time")
         }
 
-        // Fetch User Profile from email provided from Colovia Core Data service
-        val user: UserProfile? = fetchUserProfileFromEmail(email)
-
-        val inviteCode: String = generateInviteCode()
         val invite = OrganisationInvite(
             organisation = organisation,
-            user = user,
+            userId = user?.id,
             email = email,
-            token = inviteCode
+            token = generateInviteCode()
         )
 
         // Todo: Contact Email Service with invite code which will sent to the provided email address
         // Todo: Message should also contact notification service to send an in-app notificaiton with the associated invite
         // Todo: Setup Kafka...
-
-        return organisationInviteRepository.save(invite);
+        return organisationInviteRepository.save(invite).toDTO(user)
     }
 
     /**
@@ -92,19 +87,20 @@ class InvitationService(
      */
     @Transactional
     @Throws(InvitationNotFoundException::class, InvalidArgumentException::class)
-    fun handleInvitationAccept(token: String, userEmail: String): OrganisationMember{
+    fun handleInvitationAccept(token: String, userEmail: String): OrgMemberDTO{
         // Validate Invitation
         val invite: OrganisationInvite = findInvitationThroughTokenOrThrow(token)
 
         // Fetch User Profile
-        val user: UserProfile = fetchUserProfileFromEmail(userEmail) ?: throw InvalidArgumentException("User not found")
+        val user: UserPartialDTO = userService.fetchUserProfileFromEmail(userEmail) ?: throw InvalidArgumentException("User not found")
 
         validateInviteOwnership(invite, userEmail)
 
         // Consume Invite and Add member to organisation
         invite.inviteStatus = OrganisationInvite.InviteStatus.ACCEPTED
         organisationInviteRepository.save(invite)
-        return memberService.addMemberToOrganisation(invite, user)
+        val member: OrganisationMember = memberService.addMemberToOrganisation(invite, user)
+        return member.toDTO(user)
     }
 
     /**
@@ -133,39 +129,43 @@ class InvitationService(
      * @param organisationId The organisation ID to fetch all invitations for
      * @return List of OrganisationInvite objects
      */
-    fun getOrganisationInvites(organisationId: UUID, inviteStatus: OrganisationInvite.InviteStatus?): List<OrganisationInvite>{
-        if(inviteStatus == null){
-            return organisationInviteRepository.findByOrganisationId(organisationId)
+    fun getOrganisationInvites(organisationId: UUID, inviteStatus: OrganisationInvite.InviteStatus?): List<OrgInviteDTO>{
+
+        val organisationInvites = if(inviteStatus == null){
+            organisationInviteRepository.findByOrganisationId(organisationId)
+        } else {
+            organisationInviteRepository.findByOrganisationIdAndStatus(organisationId, inviteStatus)
         }
 
-        return organisationInviteRepository.findByOrganisationIdAndStatus(organisationId, inviteStatus)
+        // Fetch User Profiles for every associated invite
+        val invitationUsers: Map<UUID, UserPartialDTO?> = userService.fetchBatchUsersByIds(organisationInvites.mapNotNull { it.userId })
+
+        return organisationInvites.map { it.toDTO(invitationUsers[it.userId]) }
     }
 
     /**
      * Fetches all invitations for a specific user
+     * Won't bother fetching user profiles as this is a user specific request
      *
      * @param userId The user ID to fetch all invitations for
      * @return List of OrganisationInvite objects
      */
-    fun getUserInvites(userId: UUID, status: OrganisationInvite.InviteStatus?): List<OrganisationInvite>{
+    fun getUserInvites(userId: UUID, status: OrganisationInvite.InviteStatus?): List<OrgInviteDTO>{
         if(status == null){
-            return organisationInviteRepository.findByUserId(userId)
+            return organisationInviteRepository.findByUserId(userId).map { it.toDTO(null) }
         }
 
-        return organisationInviteRepository.findByUserIdAndStatus(userId, status)
+        return organisationInviteRepository.findByUserIdAndStatus(userId, status).map { it.toDTO(null) }
+
     }
 
     fun revokeInvitation(organisationId: UUID, email: String){
         // Validate there is an existing active invite for this user
-        val invite: OrganisationInvite? = organisationInviteRepository.findByOrganisationAndEmailAndInviteStatus(
-            organisation = organisationService.getOrganisationByID(organisationId),
+        val invite: OrganisationInvite = organisationInviteRepository.findByOrganisationAndEmailAndInviteStatus(
+            organisation = organisationService.findOrganisationByIdOrThrow(organisationId),
             email = email,
             inviteStatus = OrganisationInvite.InviteStatus.PENDING
-        ).orElse(null)
-
-        if(invite == null){
-            throw InvalidArgumentException("No active invitation found for this user")
-        }
+        ).orElseThrow{ InvalidArgumentException("No active invitation found for this user") }
 
         // Revoke the invitation
         organisationInviteRepository.delete(invite)
@@ -213,21 +213,4 @@ class InvitationService(
         return organisationInviteRepository.findByToken(token).orElseThrow { InvitationNotFoundException("Invitation not found") }
     }
 
-    /**
-     * Communicating with Colovia to fetch a user's profile based on the provided email, handling instances where the profile should not exist
-     * @param email The email of the user to fetch the profile for
-     *
-     * @return UserProfile object if the user exists, null if the user does not exist
-     */
-    private fun fetchUserProfileFromEmail(email: String): UserProfile? {
-        try{
-            val request: Request.Builder = httpService.generateInternalServiceConnection(
-                target = HttpService.TargetController.COLOVIA,
-                endpoint = "user/email/$email"
-            )
-            return httpService.get(request, UserProfile::class.java)
-        } catch(e: Exception){
-            return null
-        }
-    }
 }
