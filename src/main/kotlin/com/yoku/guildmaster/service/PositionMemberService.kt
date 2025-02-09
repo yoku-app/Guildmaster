@@ -47,7 +47,7 @@ class PositionMemberService(
     }
 
     fun moveMemberToPosition(memberId: UUID, fromPositionId: UUID, toPosition: OrganisationPosition): OrganisationMember{
-        val member: OrganisationMember = organisationMemberRepository.findByPositionIdAndUserUserId(fromPositionId, memberId)
+        val member: OrganisationMember = organisationMemberRepository.findByPositionIdAndIdUserId(fromPositionId, memberId)
             ?: throw MemberNotFoundException("Member not found in position")
 
         member.apply {

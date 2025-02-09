@@ -39,7 +39,7 @@ class PositionService(
 
     @Throws(OrganisationNotFoundException::class)
     fun getOrganisationDefaultPosition(organisationId: UUID): OrganisationPosition{
-        return organisationPositionRepository.findOrganisationPositionByOrganisationIdAndDefaultIsTrue(organisationId)
+        return organisationPositionRepository.findDefaultOrganisationPosition(organisationId)
             ?: throw OrganisationNotFoundException("Organisation not found")
     }
 

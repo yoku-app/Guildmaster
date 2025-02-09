@@ -9,7 +9,12 @@ import java.util.Optional
 import java.util.UUID
 
 interface OrganisationPositionRepository: JpaRepository<OrganisationPosition, UUID> {
-    fun findOrganisationPositionByOrganisationIdAndDefaultIsTrue(organisationId: UUID): OrganisationPosition?
+    @Query("""
+        SELECT op FROM OrganisationPosition op
+        WHERE op.organisationId = :organisationId
+        AND op.isDefault = true
+    """)
+    fun findDefaultOrganisationPosition(organisationId: UUID): OrganisationPosition?
 
     @Query("update OrganisationPosition op set op.isDefault = false where op.organisationId = :organisationId and op.isDefault = true")
     fun clearDefaultPosition(organisationId: UUID)
@@ -19,7 +24,7 @@ interface OrganisationPositionRepository: JpaRepository<OrganisationPosition, UU
         JOIN om.position op
         LEFT JOIN FETCH op.permissions
         WHERE om.organisation.id = :organisationId 
-        AND om.user.userId = :userId
+        AND om.id.userId = :userId
     """)
     fun findUserPositionWithPermissions(
          organisationId: UUID,

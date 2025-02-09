@@ -8,6 +8,9 @@ import com.yoku.guildmaster.exceptions.InvalidArgumentException
 import com.yoku.guildmaster.exceptions.InvalidOrganisationPermissionException
 import com.yoku.guildmaster.exceptions.OrganisationNotFoundException
 import com.yoku.guildmaster.repository.OrganisationRepository
+import com.yoku.guildmaster.service.cached.CachedOrganisationService
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.CachePut
 import org.springframework.stereotype.Service
 import java.util.UUID
 import kotlin.jvm.Throws
@@ -15,15 +18,14 @@ import kotlin.jvm.Throws
 @Service
 class OrganisationService(
     private val organisationRepository: OrganisationRepository,
-    private val positionService: PositionService,
+    private val cachedOrganisationService: CachedOrganisationService,
     private val positionMemberService: PositionMemberService,
     private val permissionService: PermissionService
 ) {
-
     @Throws(InvalidArgumentException::class, OrganisationNotFoundException::class)
     fun getOrganisationByID(id: UUID): OrganisationDTO {
         // Fetch Organisation Creator/Industry
-        return this.findOrganisationByIdOrThrow(id).toDTO()
+        return cachedOrganisationService.findOrganisationByIdOrThrow(id).toDTO()
     }
 
     @Throws(OrganisationNotFoundException::class)
@@ -31,6 +33,7 @@ class OrganisationService(
         return this.findOrganisationByNameOrThrow(name).toDTO()
     }
 
+    @CachePut("organisation.organisation", key = "#organisation.id")
     @Throws(OrganisationNotFoundException::class, InvalidOrganisationPermissionException::class)
     fun updateOrganisation(updaterUserId: UUID, organisation: OrganisationDTO): OrganisationDTO{
         // Validate user's permissions
@@ -41,7 +44,7 @@ class OrganisationService(
         }
 
         // Validate Organisations existence
-        val entity: Organisation = findOrganisationByIdOrThrow(organisation.id)
+        val entity: Organisation = cachedOrganisationService.findOrganisationByIdOrThrow(organisation.id)
 
         // Update Organisation
         entity.apply {
@@ -79,19 +82,13 @@ class OrganisationService(
         return this.organisationRepository.save(entity).toDTO()
     }
 
-
-    @Throws(OrganisationNotFoundException::class)
-    fun findOrganisationByIdOrThrow(id: UUID): Organisation {
-        return this.organisationRepository.findById(id)
-            .orElseThrow { OrganisationNotFoundException("Organisation not found") }
-    }
-
     @Throws(OrganisationNotFoundException::class)
     fun findOrganisationByNameOrThrow(name: String): Organisation {
         return this.organisationRepository.findByName(name)
             .orElseThrow { OrganisationNotFoundException("Organisation not found") }
     }
 
+    @CacheEvict("organisation.organisation", key = "#id")
     fun deleteOrganisation(id: UUID, userId: UUID){
         val userPosition: OrganisationPosition = positionMemberService.getUserPositionWithPermissions(id, userId)
         if(!permissionService.userHasPermission(userPosition, Permission.ORGANISATION_DELETE)){

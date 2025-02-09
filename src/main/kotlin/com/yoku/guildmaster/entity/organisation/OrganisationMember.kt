@@ -1,6 +1,7 @@
 package com.yoku.guildmaster.entity.organisation
 
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
+import com.yoku.guildmaster.entity.dto.OrganisationPartialDTO
 import com.yoku.guildmaster.entity.dto.UserPartialDTO
 import jakarta.persistence.*
 import org.hibernate.Hibernate
@@ -29,7 +30,6 @@ data class OrganisationMember(
     @JoinColumn(name = "organisation_id", nullable = false)
     val organisation: Organisation,
 
-    @MapsId("positionId")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "position_id", nullable = false)
     var position: OrganisationPosition? = null
@@ -53,6 +53,15 @@ data class OrganisationMember(
             user = user,
             memberSince = this.memberSince,
             organisation = if (includeOrganisation) this.organisation.toPartialDTO() else null,
+            position = this.position?.toPartialDTO() ?: throw IllegalStateException("Position should not be null")
+        )
+    }
+
+    fun toDTO(user: UserPartialDTO?, organisation: OrganisationPartialDTO): OrgMemberDTO {
+        return OrgMemberDTO(
+            user = user,
+            memberSince = this.memberSince,
+            organisation = organisation,
             position = this.position?.toPartialDTO() ?: throw IllegalStateException("Position should not be null")
         )
     }

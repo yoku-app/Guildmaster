@@ -12,13 +12,17 @@ import com.yoku.guildmaster.exceptions.InvalidArgumentException
 import com.yoku.guildmaster.exceptions.InvalidOrganisationPermissionException
 import com.yoku.guildmaster.exceptions.OrganisationNotFoundException
 import com.yoku.guildmaster.repository.OrganisationMemberRepository
+import com.yoku.guildmaster.service.cached.CachedOrganisationService
 import com.yoku.guildmaster.service.external.UserService
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.UUID
 import kotlin.Throws
 
 @Service
 class MemberService(private val organisationService: OrganisationService,
+                    private val cachedOrganisationService: CachedOrganisationService,
                     private val organisationMemberRepository: OrganisationMemberRepository,
                     private val positionMemberService: PositionMemberService,
                     private val permissionService: PermissionService,
@@ -26,6 +30,7 @@ class MemberService(private val organisationService: OrganisationService,
                     private val userService: UserService
 ) {
 
+    @Cacheable("organisation.member", key = "#id")
     @Throws(InvalidArgumentException::class, OrganisationNotFoundException::class)
     fun fetchOrganisationMembers(id: UUID): List<OrgMemberDTO>{
         val organisationMembers: List<OrganisationMember> = organisationMemberRepository.findByIdOrganisationId(id)
@@ -43,13 +48,15 @@ class MemberService(private val organisationService: OrganisationService,
      * @param id The user ID to fetch the organisations for
      */
     fun fetchUserOrganisations(id: UUID): List<OrgMemberDTO>{
-
-        // Won't invoke the user service to fetch the user profile as we are only interested in the organisation details
-        return organisationMemberRepository.findByIdUserId(id).map {
-            it.toDTO(
+        val organisationMembers: List<OrganisationMember> = organisationMemberRepository.findByIdUserId(id)
+        return organisationMembers.map { member ->
+            val organisation: Organisation = cachedOrganisationService.findOrganisationByIdOrThrow(member.id.organisationId)
+            member.toDTO(
+                // No need to invoke a user object as this is a user specific request
                 user = null,
-                includeOrganisation = true
-            ) }
+                organisation = organisation.toPartialDTO()
+            )
+        }
     }
 
     /**
@@ -66,10 +73,11 @@ class MemberService(private val organisationService: OrganisationService,
      *  - A user is trying to leave an organisation
      *  - A privileged user is removing another user from the organisation
      */
+    @CacheEvict("organisation.member", key = "#organisationId")
     @Throws(InvalidOrganisationPermissionException::class, OrganisationNotFoundException::class, InvalidArgumentException::class)
     fun removeMemberFromOrganisation(organisationId: UUID, userId: UUID, requesterUserId: UUID){
         // Fetch Organisation details
-        val organisation: Organisation = organisationService.findOrganisationByIdOrThrow(organisationId)
+        val organisation: Organisation = cachedOrganisationService.findOrganisationByIdOrThrow(organisationId)
 
         // Validate user is a member of the organisation
         val member: OrganisationMember = getOrganisationMember(organisationId, userId)
@@ -104,6 +112,7 @@ class MemberService(private val organisationService: OrganisationService,
      *
      * Prior validation should occur to ensure that the user is not already a current member of this organisation
      */
+    @CacheEvict("organisation.member", key = "#invite.organisation.id")
     fun addMemberToOrganisation(invite: OrganisationInvite, user: UserPartialDTO): OrganisationMember{
         // Create a new Organisation Member object
         val member: OrganisationMember = invite.toOrganisationMember(user.id)

@@ -8,6 +8,7 @@ import com.yoku.guildmaster.exceptions.InvalidArgumentException
 import com.yoku.guildmaster.exceptions.InvitationNotFoundException
 import com.yoku.guildmaster.exceptions.OrganisationNotFoundException
 import com.yoku.guildmaster.repository.OrganisationInviteRepository
+import com.yoku.guildmaster.service.cached.CachedOrganisationService
 import com.yoku.guildmaster.service.external.UserService
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
@@ -17,7 +18,7 @@ import kotlin.jvm.Throws
 @Service
 class InvitationService(
     private val organisationInviteRepository: OrganisationInviteRepository,
-    private val organisationService: OrganisationService,
+    private val cachedOrganisationService: CachedOrganisationService,
     private val positionMemberService: PositionMemberService,
     private val memberService: MemberService,
     private val permissionService: PermissionService,
@@ -40,7 +41,7 @@ class InvitationService(
         }
 
         // Validate organisation existence
-        val organisation: Organisation = organisationService.findOrganisationByIdOrThrow(organisationId)
+        val organisation: Organisation = cachedOrganisationService.findOrganisationByIdOrThrow(organisationId)
 
         // Validate the invitation creator is a member of the organisation, and has necessary permissions to extend invitations
         val creatorPosition: OrganisationPosition = positionMemberService.getUserPositionWithPermissions(organisationId, invitationCreatorId)
@@ -162,7 +163,7 @@ class InvitationService(
     fun revokeInvitation(organisationId: UUID, email: String){
         // Validate there is an existing active invite for this user
         val invite: OrganisationInvite = organisationInviteRepository.findByOrganisationAndEmailAndInviteStatus(
-            organisation = organisationService.findOrganisationByIdOrThrow(organisationId),
+            organisation = cachedOrganisationService.findOrganisationByIdOrThrow(organisationId),
             email = email,
             inviteStatus = OrganisationInvite.InviteStatus.PENDING
         ).orElseThrow{ InvalidArgumentException("No active invitation found for this user") }

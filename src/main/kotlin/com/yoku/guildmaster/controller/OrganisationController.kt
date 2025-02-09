@@ -5,14 +5,7 @@ import com.yoku.guildmaster.entity.organisation.Organisation
 import com.yoku.guildmaster.service.OrganisationService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
 @RestController
@@ -31,10 +24,12 @@ class OrganisationController(private val organisationService: OrganisationServic
         return ResponseEntity.ok(organisation)
     }
 
-    @PutMapping("/{userId}")
-    fun updateOrganisation(@RequestBody organisation: OrganisationDTO, @PathVariable userId: UUID): ResponseEntity<OrganisationDTO>{
+    @PutMapping("/")
+    fun updateOrganisation(@RequestBody organisation: OrganisationDTO, @RequestHeader("X-User-Id") originUserId: UUID?): ResponseEntity<OrganisationDTO>{
+        if(originUserId == null) throw IllegalArgumentException("User Id was not provided in request headers")
+
         val updatedOrganisation: OrganisationDTO = this.organisationService.updateOrganisation(
-            updaterUserId = userId,
+            updaterUserId = originUserId,
             organisation = organisation)
 
         return ResponseEntity.ok(updatedOrganisation)
@@ -46,9 +41,11 @@ class OrganisationController(private val organisationService: OrganisationServic
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrganisation)
     }
 
-    @DeleteMapping("/{id}/user/{userId}")
-    fun deleteOrganisation(@PathVariable id: UUID, @PathVariable userId: UUID): ResponseEntity<Unit>{
-        this.organisationService.deleteOrganisation(id, userId)
+    @DeleteMapping("/{organisationId}")
+    fun deleteOrganisation(@PathVariable organisationId: UUID, @RequestHeader("X-User-Id") originUserId: UUID?): ResponseEntity<Unit>{
+        if(originUserId == null) throw IllegalArgumentException("User Id was not provided in request headers")
+
+        this.organisationService.deleteOrganisation(organisationId, originUserId)
         return ResponseEntity.ok().build()
     }
 }

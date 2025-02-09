@@ -16,6 +16,5 @@ interface OrganisationMemberRepository: JpaRepository<OrganisationMember, Organi
     fun updateByPositionId(positionId: UUID, newPositionId: UUID): Int
 
     @Query
-    fun findByPositionIdAndUserUserId(positionId: UUID, userId: UUID): OrganisationMember?
-
+    fun findByPositionIdAndIdUserId(positionId: UUID, userId: UUID): OrganisationMember?
 }
