@@ -1,16 +1,18 @@
 package com.yoku.guildmaster.entity.organisation
 
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
-import com.yoku.guildmaster.entity.user.UserProfile
+import com.yoku.guildmaster.entity.dto.OrganisationPartialDTO
+import com.yoku.guildmaster.entity.dto.UserPartialDTO
 import jakarta.persistence.*
+import org.hibernate.Hibernate
 import java.io.Serializable
 import java.time.ZonedDateTime
-import java.util.Date
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(
     name = "org_member",
+    schema = "organisation",
     indexes = [
         Index(name = "idx_member_user_id", columnList = "user_id"),
         Index(name = "idx_member_organisation_id", columnList = "organisation_id")
@@ -23,15 +25,14 @@ data class OrganisationMember(
     @Column(name = "member_since", nullable = false, updatable = false)
     val memberSince: ZonedDateTime = ZonedDateTime.now(),
 
-    @MapsId("userId")
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false)
-    val user: UserProfile,
-
     @MapsId("organisationId")
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organisation_id", nullable = false)
-    val organisation: Organisation
+    val organisation: Organisation,
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "position_id", nullable = false)
+    var position: OrganisationPosition? = null
 ) {
     @Embeddable
     data class OrganisationMemberKey(
@@ -42,19 +43,27 @@ data class OrganisationMember(
         val userId: UUID
     ) : Serializable
 
-    fun toDTO(): OrgMemberDTO {
+    fun toDTO(user: UserPartialDTO?, includeOrganisation: Boolean = false): OrgMemberDTO {
+        // Force Lazy rendering of Org if requested
+        if(includeOrganisation){
+            Hibernate.initialize(this.organisation)
+        }
+
         return OrgMemberDTO(
-            id = this.id.userId,
-            displayName = this.user.displayName,
-            email = this.user.email,
-            avatarUrl = this.user.avatarUrl,
+            user = user,
             memberSince = this.memberSince,
-            organisation = this.organisation.toPartialDTO()
+            organisation = if (includeOrganisation) this.organisation.toPartialDTO() else null,
+            position = this.position?.toPartialDTO() ?: throw IllegalStateException("Position should not be null")
         )
     }
 
-    fun hasPermission(): Boolean {
-        return true
+    fun toDTO(user: UserPartialDTO?, organisation: OrganisationPartialDTO): OrgMemberDTO {
+        return OrgMemberDTO(
+            user = user,
+            memberSince = this.memberSince,
+            organisation = organisation,
+            position = this.position?.toPartialDTO() ?: throw IllegalStateException("Position should not be null")
+        )
     }
 
 }

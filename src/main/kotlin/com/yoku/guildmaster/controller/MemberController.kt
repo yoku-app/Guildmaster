@@ -2,6 +2,7 @@ package com.yoku.guildmaster.controller
 
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
 import com.yoku.guildmaster.entity.dto.OrganisationDTO
+import com.yoku.guildmaster.exceptions.UnauthorizedException
 import com.yoku.guildmaster.service.MemberService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -28,9 +29,13 @@ class MemberController(private val memberService: MemberService) {
         return ResponseEntity.ok(organisations)
     }
 
-    @DeleteMapping("/user/{userId}/organisation/{organisationId}/originUserId/{requesterUserId}")
-    fun removeMemberFromOrganisation(@PathVariable userId: UUID, @PathVariable organisationId: UUID, @PathVariable requesterUserId: UUID): ResponseEntity<Unit>{
-        this.memberService.removeMemberFromOrganisation(organisationId, userId, requesterUserId)
+    @DeleteMapping("/user/{userId}/organisation/{organisationId}")
+    fun removeMemberFromOrganisation(@PathVariable userId: UUID,
+                                     @PathVariable organisationId: UUID,
+                                     @RequestHeader("X-User-Id") originUserId: UUID?): ResponseEntity<Unit>{
+        if(originUserId == null) throw UnauthorizedException("User Id was not provided in request headers")
+
+        this.memberService.removeMemberFromOrganisation(organisationId, userId, originUserId)
         return ResponseEntity.ok().build()
     }
 

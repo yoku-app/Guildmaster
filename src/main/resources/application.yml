@@ -7,6 +7,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        default_schema: organisation
   data:
     redis:
       host: ${REDIS_DB_HOST}
@@ -17,6 +20,10 @@ server:
   port: 8085
   origins:
     - ${ORIGIN_API_URL}
+  connections:
+    colovia: ${COLOVIA_SERVICE_URL}
+    secunda: ${SECUNDA_SERVICE_URL}
+
 logging:
   level:
     root: INFO

@@ -1,9 +1,11 @@
 package com.yoku.guildmaster.entity.organisation
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.yoku.guildmaster.entity.dto.OrganisationDTO
 import com.yoku.guildmaster.entity.dto.OrganisationPartialDTO
-import com.yoku.guildmaster.entity.lookups.Industry
-import com.yoku.guildmaster.entity.user.UserProfile
+import com.yoku.guildmaster.entity.dto.UserPartialDTO
+import com.yoku.guildmaster.entity.shared.lookups.IndustryLookupDTO
 import jakarta.persistence.*
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -11,6 +13,7 @@ import java.util.UUID
 @Entity
 @Table(
     name = "organisation",
+    schema = "organisation",
     uniqueConstraints = [
         UniqueConstraint(columnNames = ["org_name"]),
         UniqueConstraint(columnNames = ["org_email"])
@@ -19,6 +22,7 @@ import java.util.UUID
         Index(name = "idx_org_name", columnList = "org_name")
     ]
 )
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 data class Organisation(
 
     @Id
@@ -26,13 +30,11 @@ data class Organisation(
     @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
     val id: UUID? = null,
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "org_industry_id", nullable = false)
-    var industry: Industry,
+    @Column(name = "org_industry_id", nullable = false)
+    var industryId: UUID,
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "org_creator_id", nullable = false)
-    var creator: UserProfile,
+    @Column(name = "org_creator_id", nullable = false)
+    var creatorId: UUID,
 
     @Column(name = "org_name", nullable = false, unique = true)
     var name: String,
@@ -64,24 +66,18 @@ data class Organisation(
     @Column(name = "avg_survey_review", nullable = false,  updatable = false)
     val averageSurveyReviewRating: Double = 0.0,
 
+    @JsonIgnore
     @OneToMany(mappedBy = "organisation", fetch = FetchType.LAZY)
     val invites: MutableList<OrganisationInvite> = mutableListOf(),
 
+    @JsonIgnore
     @OneToMany(mappedBy = "organisation", fetch = FetchType.LAZY)
     val members: MutableList<OrganisationMember> = mutableListOf()
 ) {
 
-    fun addMember(member: OrganisationMember) {
-        members.add(member)
-    }
-
-    fun addInvite(invite: OrganisationInvite) {
-        invites.add(invite)
-    }
-
-    fun toDTO(includeCreator: Boolean = false): OrganisationDTO {
+    fun toDTO(creator: UserPartialDTO?, industry: IndustryLookupDTO?): OrganisationDTO {
         return OrganisationDTO(
-            id = this.id ?: UUID.randomUUID(),
+            id = this.id ?: throw IllegalStateException("ID should not be null"),
             name = this.name,
             description = this.description,
             email = this.email,
@@ -90,14 +86,30 @@ data class Organisation(
             publicStatus = this.publicStatus,
             surveyCreationCount = this.surveyCreationCount,
             averageSurveyReviewRating = this.averageSurveyReviewRating,
-            industry = this.industry,
-            creator = if(includeCreator) this.creator else null
+            industry = industry,
+            creator = creator
+        )
+    }
+
+    fun toDTO(): OrganisationDTO {
+        return OrganisationDTO(
+            id = this.id ?: throw IllegalStateException("ID should not be null"),
+            name = this.name,
+            description = this.description,
+            email = this.email,
+            memberCount = this.memberCount,
+            avatarURL = this.avatarURL,
+            publicStatus = this.publicStatus,
+            surveyCreationCount = this.surveyCreationCount,
+            averageSurveyReviewRating = this.averageSurveyReviewRating,
+            creator = null,
+            industry = null
         )
     }
 
     fun toPartialDTO(): OrganisationPartialDTO {
         return OrganisationPartialDTO(
-            id = this.id ?: UUID.randomUUID(),
+            id = this.id ?: throw IllegalStateException("ID should not be null"),
             name = this.name,
             description = this.description,
             avatarURL = this.avatarURL,

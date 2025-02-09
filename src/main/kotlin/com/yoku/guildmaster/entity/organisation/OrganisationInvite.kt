@@ -1,19 +1,15 @@
 package com.yoku.guildmaster.entity.organisation
 
 import com.yoku.guildmaster.entity.dto.OrgInviteDTO
-import com.yoku.guildmaster.entity.user.UserProfile
+import com.yoku.guildmaster.entity.dto.UserPartialDTO
 import jakarta.persistence.*
-import org.hibernate.annotations.GenericGenerator
-import org.hibernate.annotations.IdGeneratorType
-import java.time.Duration
-import java.time.Instant
 import java.time.ZonedDateTime
-import java.util.Date
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(
     name = "org_user_invite",
+    schema = "organisation",
     indexes = [
         Index(name = "idx_invite_user_id", columnList = "user_id"),
         Index(name = "idx_invite_code", columnList = "invite_code")
@@ -26,17 +22,13 @@ data class OrganisationInvite(
     @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
     val id: UUID? = null,
 
-    @Version
-    @Column(name = "version")
-    var version: Long = 0,
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "organisation_id")
     val organisation: Organisation,
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
-    val user: UserProfile?,
+    @Column(name = "user_id")
+    val userId: UUID?,
+
     @Column(name = "email")
     val email: String,
     @Column(name = "invite_code", length = 12, nullable = false)
@@ -57,24 +49,23 @@ data class OrganisationInvite(
         EXPIRED
     }
 
-    fun toOrganisationMember(user: UserProfile): OrganisationMember{
+    fun toOrganisationMember(userId: UUID): OrganisationMember{
         val organisationMemberKey = OrganisationMember.OrganisationMemberKey(
-            organisationId = this.organisation.id ?: UUID.randomUUID(),
-            userId = user.userId
+            organisationId = this.organisation.id ?: throw IllegalStateException("ID should not be null"),
+            userId = userId
         )
 
         return OrganisationMember(
             id = organisationMemberKey,
-            user = user,
             organisation = this.organisation
         )
     }
 
-    fun toDTO(): OrgInviteDTO {
+    fun toDTO(user: UserPartialDTO?): OrgInviteDTO {
         return OrgInviteDTO(
-            id = this.id ?: UUID.randomUUID(),
+            id = this.id ?: throw IllegalStateException("ID should not be null"),
             organisation = this.organisation.toPartialDTO(),
-            user = this.user?.toPartialDTO(),
+            user = user,
             email = this.email,
             token = this.token,
             inviteStatus = this.inviteStatus,
