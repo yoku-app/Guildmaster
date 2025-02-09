@@ -1,6 +1,7 @@
 package com.yoku.guildmaster.service
 
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
+import com.yoku.guildmaster.entity.dto.OrgPositionDTO
 import com.yoku.guildmaster.entity.dto.UserPartialDTO
 import com.yoku.guildmaster.entity.organisation.OrganisationMember
 import com.yoku.guildmaster.entity.organisation.OrganisationPosition
@@ -26,8 +27,8 @@ class PositionMemberService(
         ) }
     }
 
-    fun getUserPositionWithPermissions(organisationId: UUID, userId: UUID): OrganisationPosition {
-        return cachedService.getUserPositionWithPermissions(organisationId, userId)
+    fun getUserPositionWithPermissions(organisationId: UUID, userId: UUID): OrgPositionDTO {
+        return cachedService.getUserPositionWithPermissions(organisationId, userId).toDTO()
     }
 
     /**

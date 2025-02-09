@@ -1,8 +1,12 @@
 package com.yoku.guildmaster.entity.dto
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.yoku.guildmaster.entity.organisation.OrganisationPermission
 import com.yoku.guildmaster.entity.organisation.OrganisationInvite
+import com.yoku.guildmaster.entity.organisation.Permission
 import com.yoku.guildmaster.entity.shared.lookups.IndustryLookupDTO
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -46,13 +50,41 @@ data class OrgInviteDTO(
     val expiresAt: ZonedDateTime
 )
 
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+data class CachedOrgPosition(
+    val id: UUID,
+    val organisationId: UUID,
+    val name: String,
+    val rank: Int,
+    val permissions: List<OrgPermissionDTO>,
+    val isDefault: Boolean
+){
+    fun toDTO(): OrgPositionDTO = OrgPositionDTO(
+        id = this.id,
+        name = this.name,
+        permissions = this.permissions,
+        organisationId = this.organisationId,
+        rank = this.rank,
+        isDefault = this.isDefault
+    )
+}
+
 data class OrgPositionDTO(
     val id: UUID,
     val organisationId: UUID,
     val name: String,
     val rank: Int,
-    val permissions: List<OrganisationPermission>,
+    val permissions: List<OrgPermissionDTO>,
     val isDefault: Boolean
+)
+
+data class OrgPermissionDTO(
+    val id: Int,
+    @Enumerated(EnumType.STRING)
+    val name: Permission,
+    val description: String?,
+    val requiresHierarchy: Boolean
 )
 
 data class OrgPositionPartialDTO(

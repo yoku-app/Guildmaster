@@ -1,6 +1,7 @@
 package com.yoku.guildmaster.service
 
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
+import com.yoku.guildmaster.entity.dto.OrgPermissionDTO
 import com.yoku.guildmaster.entity.dto.OrgPositionDTO
 import com.yoku.guildmaster.entity.organisation.OrganisationPermission
 import com.yoku.guildmaster.entity.organisation.Permission
@@ -49,7 +50,7 @@ class PositionService(
     fun createPosition(position: OrgPositionDTO, requesterId: UUID): OrgPositionDTO{
 
         // Validate User has permission to create a new position
-        val userPosition = positionMemberService.getUserPositionWithPermissions(position.organisationId, requesterId)
+        val userPosition: OrgPositionDTO = positionMemberService.getUserPositionWithPermissions(position.organisationId, requesterId)
         if(!permissionService.userHasPermission(userPosition, Permission.ROLE_CREATE)){
             throw IllegalArgumentException("User does not have permission to create a new position")
         }
@@ -60,9 +61,9 @@ class PositionService(
             rank = position.rank,
         )
 
-        orgPosition.apply {
-            this.permissions = position.permissions.toMutableList()
-        }
+        val permissions = position.permissions.map { OrganisationPermission(it.id, it.name) }
+
+
 
         if(position.isDefault){
             setNewPositionAsDefault(orgPosition)
@@ -98,12 +99,12 @@ class PositionService(
         }
 
         // Find permission changes
-        val (toAdd, toRemove) = findAlteredPermissions(currentPosition.permissions, position.permissions)
+        val (toAdd, toRemove) = findAlteredPermissions(currentPosition.permissions.map { it.toDto() }, position.permissions)
 
         // Directly modify JPA-managed permissions collection
         currentPosition.permissions.apply {
-            addAll(toAdd)
-            removeAll(toRemove)
+            addAll(toAdd.map { OrganisationPermission(it.id, it.name) })
+            removeAll(toRemove.map { OrganisationPermission(it.id, it.name) })
         }
 
         // Saving the entity will automatically update the join table
@@ -165,8 +166,8 @@ class PositionService(
      *
      * @return Pair of added and removed permissions (Pair<Added, Removed>)
      */
-    private fun findAlteredPermissions(prevPermissions: List<OrganisationPermission>, currPermissions: List<OrganisationPermission>):
-            Pair<List<OrganisationPermission>, List<OrganisationPermission>>{
+    private fun findAlteredPermissions(prevPermissions: List<OrgPermissionDTO>, currPermissions: List<OrgPermissionDTO>):
+            Pair<List<OrgPermissionDTO>, List<OrgPermissionDTO>>{
 
         val addedPermissions = currPermissions.filter { permission -> !prevPermissions.contains(permission) }
         val removedPermissions = prevPermissions.filter { permission -> !currPermissions.contains(permission) }

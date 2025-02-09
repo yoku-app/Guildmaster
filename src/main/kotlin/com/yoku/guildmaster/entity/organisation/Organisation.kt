@@ -1,5 +1,7 @@
 package com.yoku.guildmaster.entity.organisation
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.yoku.guildmaster.entity.dto.OrganisationDTO
 import com.yoku.guildmaster.entity.dto.OrganisationPartialDTO
 import com.yoku.guildmaster.entity.dto.UserPartialDTO
@@ -20,6 +22,7 @@ import java.util.UUID
         Index(name = "idx_org_name", columnList = "org_name")
     ]
 )
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 data class Organisation(
 
     @Id
@@ -63,9 +66,11 @@ data class Organisation(
     @Column(name = "avg_survey_review", nullable = false,  updatable = false)
     val averageSurveyReviewRating: Double = 0.0,
 
+    @JsonIgnore
     @OneToMany(mappedBy = "organisation", fetch = FetchType.LAZY)
     val invites: MutableList<OrganisationInvite> = mutableListOf(),
 
+    @JsonIgnore
     @OneToMany(mappedBy = "organisation", fetch = FetchType.LAZY)
     val members: MutableList<OrganisationMember> = mutableListOf()
 ) {

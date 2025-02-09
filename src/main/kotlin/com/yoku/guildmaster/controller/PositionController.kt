@@ -27,25 +27,28 @@ class PositionController(private val positionService: PositionService, private v
     }
 
     @GetMapping("/user/{userId}/organisation/{organisationId}")
-    fun getUserPositionWithPermissions(@PathVariable userId: UUID, @PathVariable organisationId: UUID): OrgPositionDTO{
-        return positionMemberService.getUserPositionWithPermissions(organisationId, userId).toDTO()
+    fun getUserPositionWithPermissions(@PathVariable userId: UUID, @PathVariable organisationId: UUID): ResponseEntity<OrgPositionDTO>{
+        val position: OrgPositionDTO = positionMemberService.getUserPositionWithPermissions(organisationId, userId)
+        return ResponseEntity.ok(position)
     }
 
-    @PostMapping("/userId/{userId}")
-    fun createNewPosition(position: OrgPositionDTO, @PathVariable userId: UUID ): ResponseEntity<OrgPositionDTO>{
-        val newPosition: OrgPositionDTO = positionService.createPosition(position, userId)
+    @PostMapping("/")
+    fun createNewPosition(@RequestBody position: OrgPositionDTO, @RequestHeader("X-User-Id") originUserId: UUID ): ResponseEntity<OrgPositionDTO>{
+        val newPosition: OrgPositionDTO = positionService.createPosition(position, originUserId)
         return ResponseEntity.status(HttpStatus.CREATED).body(newPosition)
     }
 
-    @PutMapping("/userId/{userId}")
-    fun updatePosition(position: OrgPositionDTO, @PathVariable userId: UUID ): ResponseEntity<OrgPositionDTO>{
-        val updatedPosition: OrgPositionDTO = positionService.updatePosition(position, userId)
+    @PutMapping("/")
+    fun updatePosition(@RequestBody position: OrgPositionDTO, @RequestHeader("X-User-Id") originUserId: UUID ): ResponseEntity<OrgPositionDTO>{
+        val updatedPosition: OrgPositionDTO = positionService.updatePosition(position, originUserId)
         return ResponseEntity.ok(updatedPosition)
     }
 
-    @DeleteMapping("position/{positionId}/newPosition/{newPositionId}/userId/{userId}")
-    fun deletePosition(@PathVariable positionId: UUID, @PathVariable newPositionId: UUID ,@PathVariable userId: UUID ): ResponseEntity<Unit>{
-        positionService.removePosition(positionId, newPositionId, userId)
+    @DeleteMapping("{positionId}/newPosition/{newPositionId}")
+    fun deletePosition(@PathVariable positionId: UUID,
+                       @PathVariable newPositionId: UUID,
+                       @RequestHeader("X-User-Id") originUserId: UUID  ): ResponseEntity<Unit>{
+        positionService.removePosition(positionId, newPositionId, originUserId)
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
     }
 

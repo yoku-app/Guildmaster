@@ -1,5 +1,6 @@
 package com.yoku.guildmaster.service
 
+import com.yoku.guildmaster.entity.dto.OrgPositionDTO
 import com.yoku.guildmaster.entity.dto.OrganisationDTO
 import com.yoku.guildmaster.entity.organisation.Permission
 import com.yoku.guildmaster.entity.organisation.Organisation
@@ -37,7 +38,8 @@ class OrganisationService(
     @Throws(OrganisationNotFoundException::class, InvalidOrganisationPermissionException::class)
     fun updateOrganisation(updaterUserId: UUID, organisation: OrganisationDTO): OrganisationDTO{
         // Validate user's permissions
-        val userPosition: OrganisationPosition = positionMemberService.getUserPositionWithPermissions(organisation.id, updaterUserId)
+        val userPosition: OrgPositionDTO =
+            positionMemberService.getUserPositionWithPermissions(organisation.id, updaterUserId)
 
         if(!permissionService.userHasPermission(userPosition, Permission.ORGANISATION_EDIT)){
             throw InvalidOrganisationPermissionException("User does not have permission to update Organisation")
@@ -90,7 +92,7 @@ class OrganisationService(
 
     @CacheEvict("organisation.organisation", key = "#id")
     fun deleteOrganisation(id: UUID, userId: UUID){
-        val userPosition: OrganisationPosition = positionMemberService.getUserPositionWithPermissions(id, userId)
+        val userPosition: OrgPositionDTO = positionMemberService.getUserPositionWithPermissions(id, userId)
         if(!permissionService.userHasPermission(userPosition, Permission.ORGANISATION_DELETE)){
             throw InvalidOrganisationPermissionException("User does not have permission to delete Organisation")
         }

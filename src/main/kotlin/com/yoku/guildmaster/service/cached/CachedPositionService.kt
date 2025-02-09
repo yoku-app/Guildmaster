@@ -1,5 +1,7 @@
 package com.yoku.guildmaster.service.cached
 
+import com.yoku.guildmaster.entity.dto.CachedOrgPosition
+import com.yoku.guildmaster.entity.dto.OrgPositionDTO
 import com.yoku.guildmaster.entity.organisation.OrganisationMember
 import com.yoku.guildmaster.entity.organisation.OrganisationPosition
 import com.yoku.guildmaster.exceptions.OrganisationNotFoundException
@@ -18,9 +20,10 @@ class CachedPositionService(
 
     @Throws(OrganisationNotFoundException::class)
     @Cacheable("organisation.position.user", key = "#organisationId + '-' + #userId")
-    fun getUserPositionWithPermissions(organisationId: UUID, userId: UUID): OrganisationPosition {
-        return organisationPositionRepository.findUserPositionWithPermissions(organisationId, userId)?:
-        throw OrganisationPositionNotFoundException("Position not found")
+    fun getUserPositionWithPermissions(organisationId: UUID, userId: UUID): CachedOrgPosition {
+        val position: OrganisationPosition = organisationPositionRepository.findUserPositionWithPermissions(organisationId, userId)
+            ?: throw OrganisationNotFoundException("Organisation not found for user")
+        return position.toCache()
     }
 
     /**

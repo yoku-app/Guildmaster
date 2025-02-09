@@ -1,5 +1,7 @@
 package com.yoku.guildmaster.entity.organisation
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.yoku.guildmaster.entity.dto.CachedOrgPosition
 import com.yoku.guildmaster.entity.dto.OrgPositionDTO
 import com.yoku.guildmaster.entity.dto.OrgPositionPartialDTO
 import jakarta.persistence.*
@@ -14,6 +16,8 @@ import java.util.*
         Index(name = "idx_org_position_organisation_id", columnList = "organisation_id"),
     ]
 )
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 data class OrganisationPosition(
     @Id
     @GeneratedValue
@@ -43,9 +47,18 @@ data class OrganisationPosition(
     fun toDTO(): OrgPositionDTO = OrgPositionDTO(
         id = this.id ?: throw IllegalStateException("ID should not be null"),
         name = this.name,
-        permissions = this.permissions,
+        permissions = this.permissions.map { it.toDto() },
         organisationId = this.organisationId,
         rank = this.rank,
+        isDefault = this.isDefault
+    )
+
+    fun toCache(): CachedOrgPosition = CachedOrgPosition(
+        id = this.id ?: throw IllegalStateException("ID should not be null"),
+        organisationId = this.organisationId,
+        name = this.name,
+        rank = this.rank,
+        permissions = this.permissions.map { it.toDto() },
         isDefault = this.isDefault
     )
 

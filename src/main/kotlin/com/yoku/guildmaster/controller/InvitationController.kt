@@ -4,10 +4,8 @@ import com.yoku.guildmaster.entity.dto.OrgInviteDTO
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
 import com.yoku.guildmaster.entity.dto.UserPartialDTO
 import com.yoku.guildmaster.entity.organisation.OrganisationInvite
-import com.yoku.guildmaster.entity.organisation.OrganisationMember
 import com.yoku.guildmaster.exceptions.UnauthorizedException
 import com.yoku.guildmaster.service.InvitationService
-import jakarta.persistence.Enumerated
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping

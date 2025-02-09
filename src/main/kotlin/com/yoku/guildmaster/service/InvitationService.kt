@@ -2,6 +2,7 @@ package com.yoku.guildmaster.service
 
 import com.yoku.guildmaster.entity.dto.OrgInviteDTO
 import com.yoku.guildmaster.entity.dto.OrgMemberDTO
+import com.yoku.guildmaster.entity.dto.OrgPositionDTO
 import com.yoku.guildmaster.entity.dto.UserPartialDTO
 import com.yoku.guildmaster.entity.organisation.*
 import com.yoku.guildmaster.exceptions.InvalidArgumentException
@@ -44,7 +45,7 @@ class InvitationService(
         val organisation: Organisation = cachedOrganisationService.findOrganisationByIdOrThrow(organisationId)
 
         // Validate the invitation creator is a member of the organisation, and has necessary permissions to extend invitations
-        val creatorPosition: OrganisationPosition = positionMemberService.getUserPositionWithPermissions(organisationId, invitationCreatorId)
+        val creatorPosition: OrgPositionDTO = positionMemberService.getUserPositionWithPermissions(organisationId, invitationCreatorId)
         if(!permissionService.userHasPermission(creatorPosition, Permission.MEMBER_INVITE)){
             throw InvalidArgumentException("User does not have permission to invite users")
         }

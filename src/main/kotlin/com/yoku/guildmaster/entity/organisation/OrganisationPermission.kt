@@ -1,5 +1,7 @@
 package com.yoku.guildmaster.entity.organisation
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.yoku.guildmaster.entity.dto.OrgPermissionDTO
 import jakarta.persistence.*
 
 @Entity
@@ -9,6 +11,7 @@ import jakarta.persistence.*
     uniqueConstraints = [UniqueConstraint(columnNames = ["permission_name"])],
     indexes = [Index(name = "idx_org_permission_name", columnList = "permission_name")]
 )
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 data class OrganisationPermission(
     @Id
     @Column(name = "id", nullable = false, updatable = false)
@@ -23,7 +26,14 @@ data class OrganisationPermission(
 
     @Column(name = "requires_hierarchy", nullable = false)
     val requiresHierarchy: Boolean = false
-)
+){
+    fun toDto(): OrgPermissionDTO = OrgPermissionDTO(
+        id = this.id,
+        name = this.name,
+        description = this.description,
+        requiresHierarchy = this.requiresHierarchy
+    )
+}
 
 enum class Permission(val id: Int) {
     ORGANISATION_EDIT(1),

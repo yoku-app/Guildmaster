@@ -1,5 +1,6 @@
 package com.yoku.guildmaster.service
 
+import com.yoku.guildmaster.entity.dto.OrgPositionDTO
 import com.yoku.guildmaster.entity.organisation.Permission
 import com.yoku.guildmaster.entity.organisation.OrganisationPosition
 import org.springframework.stereotype.Service
@@ -15,14 +16,14 @@ class PermissionService {
      * It is best if we used this as it is cached, whilst a lazy loaded entity would require an additional
      * query to find all permissions
      */
-    fun userHasPermission(userPosition: OrganisationPosition, permission: Permission): Boolean{
+    fun userHasPermission(userPosition: OrgPositionDTO, permission: Permission): Boolean{
         return userPosition.permissions.any { it.id == permission.id }
     }
 
     /**
      * Hierarchical based permission check
      */
-    fun userHasPermission(userPosition: OrganisationPosition, permission: Permission, targetPosition: OrganisationPosition): Boolean{
+    fun userHasPermission(userPosition: OrgPositionDTO, permission: Permission, targetPosition: OrgPositionDTO): Boolean{
         return userPosition.permissions.any { it.id == permission.id } && userPosition.rank > targetPosition.rank
     }
 }

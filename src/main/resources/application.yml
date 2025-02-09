@@ -21,8 +21,8 @@ server:
   origins:
     - ${ORIGIN_API_URL}
   connections:
-    colovia: ${COLOVIA_SERVICE_URL},
-    secunda: ${SECUNDA_SERVICE_URL},
+    colovia: ${COLOVIA_SERVICE_URL}
+    secunda: ${SECUNDA_SERVICE_URL}
 
 logging:
   level:
