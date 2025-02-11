@@ -31,7 +31,7 @@ data class Organisation(
     val id: UUID? = null,
 
     @Column(name = "org_industry_id", nullable = false)
-    var industryId: UUID,
+    var industryId: UUID?,
 
     @Column(name = "org_creator_id", nullable = false)
     var creatorId: UUID,

@@ -67,10 +67,6 @@ class OrganisationService(
             throw InvalidArgumentException("Organisation must have a creator")
         }
 
-        if(organisation.industry == null){
-            throw InvalidArgumentException("Organisation must have an industry")
-        }
-
         val entity = Organisation(
             name = organisation.name,
             description = organisation.description,
@@ -78,7 +74,7 @@ class OrganisationService(
             publicStatus = organisation.publicStatus,
             email = organisation.email,
             creatorId = organisation.creator.id,
-            industryId = organisation.industry.id
+            industryId = organisation.industry?.id
         )
 
         return this.organisationRepository.save(entity).toDTO()
