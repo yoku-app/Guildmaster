@@ -56,7 +56,7 @@ data class Organisation(
 
     @Column(name = "org_type")
     @Enumerated(EnumType.STRING)
-    var type: OrganisationType = OrganisationType.PERSONAL,
+    var orgType: OrganisationType = OrganisationType.PERSONAL,
 
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: ZonedDateTime = ZonedDateTime.now(),
@@ -94,6 +94,7 @@ data class Organisation(
             description = this.description,
             email = this.email,
             memberCount = this.memberCount,
+            orgType = this.orgType,
             avatarURL = this.avatarURL,
             publicStatus = this.publicStatus,
             surveyCreationCount = this.surveyCreationCount,
@@ -111,6 +112,7 @@ data class Organisation(
             name = this.name,
             description = this.description,
             email = this.email,
+            orgType = this.orgType,
             memberCount = this.memberCount,
             avatarURL = this.avatarURL,
             publicStatus = this.publicStatus,
@@ -125,6 +127,7 @@ data class Organisation(
         return OrganisationPartialDTO(
             id = this.id ?: throw IllegalStateException("ID should not be null"),
             name = this.name,
+            orgType = this.orgType,
             description = this.description,
             avatarURL = this.avatarURL,
             publicStatus = this.publicStatus

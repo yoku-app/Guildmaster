@@ -1,6 +1,7 @@
 package com.yoku.guildmaster.entity.dto
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.yoku.guildmaster.entity.organisation.Organisation
 import com.yoku.guildmaster.entity.organisation.OrganisationPermission
 import com.yoku.guildmaster.entity.organisation.OrganisationInvite
 import com.yoku.guildmaster.entity.organisation.Permission
@@ -16,6 +17,8 @@ data class OrganisationDTO(
     val creatorId: UUID,
     val name: String,
     val description: String,
+    @Enumerated(EnumType.STRING)
+    val orgType: Organisation.OrganisationType,
     val email: String,
     val memberCount: Int,
     val avatarURL: String?,
@@ -29,6 +32,8 @@ data class OrganisationDTO(
 data class OrganisationPartialDTO(
     val id: UUID,
     val name: String,
+    @Enumerated(EnumType.STRING)
+    val orgType: Organisation.OrganisationType,
     val description: String,
     val avatarURL: String?,
     val publicStatus: Boolean,
