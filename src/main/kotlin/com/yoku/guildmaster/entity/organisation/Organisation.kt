@@ -54,6 +54,10 @@ data class Organisation(
     @Column(name = "org_public_status", nullable = false)
     var publicStatus: Boolean = false,
 
+    @Column(name = "org_type")
+    @Enumerated(EnumType.STRING)
+    var type: OrganisationType = OrganisationType.PERSONAL,
+
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: ZonedDateTime = ZonedDateTime.now(),
 
@@ -75,9 +79,17 @@ data class Organisation(
     val members: MutableList<OrganisationMember> = mutableListOf()
 ) {
 
+    enum class OrganisationType{
+        PERSONAL,
+        COMPANY,
+        EDUCATIONAL
+    }
+
     fun toDTO(creator: UserPartialDTO?, industry: IndustryLookupDTO?): OrganisationDTO {
         return OrganisationDTO(
             id = this.id ?: throw IllegalStateException("ID should not be null"),
+            creatorId = this.creatorId,
+            industryId = this.industryId,
             name = this.name,
             description = this.description,
             email = this.email,
@@ -94,6 +106,8 @@ data class Organisation(
     fun toDTO(): OrganisationDTO {
         return OrganisationDTO(
             id = this.id ?: throw IllegalStateException("ID should not be null"),
+            creatorId = this.creatorId,
+            industryId = this.industryId,
             name = this.name,
             description = this.description,
             email = this.email,
